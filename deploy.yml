@@ -2,9 +2,7 @@ name: Deploy to Vercel
 
 on:
   push:
-    branches: [main]    # or your default branch
-  pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [main]
 
 jobs:
   deploy:
@@ -22,8 +20,4 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            vercel --prod --token $VERCEL_TOKEN --org $VERCEL_ORG_ID --project $VERCEL_PROJECT_ID --confirm --yes
-          else
-            vercel --token $VERCEL_TOKEN --org $VERCEL_ORG_ID --project $VERCEL_PROJECT_ID --confirm --yes
-          fi
+          vercel --prod --token $VERCEL_TOKEN --org $VERCEL_ORG_ID --project $VERCEL_PROJECT_ID --confirm --yes
