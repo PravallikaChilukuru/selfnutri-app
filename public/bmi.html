@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selfnutri-BMI Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/selfnutri-favicon.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.075rem;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+
+        .footer {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: auto; /* Pushes footer to the bottom */
+        }
+    
+        .special-header {
+            width: 95%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            border-radius: 18px;
+            margin: 20px auto;
+            box-sizing: border-box;
+            max-width: 1200px; /* Limit header width */ 
+            transition: box-shadow 0.3s ease;
+            z-index: 2000;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2196f3;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .logo i {
+            margin-right: 8px;
+            color: #2196f3;
+        }
+        .menu-toggle {
+        font-size: 1.8rem;
+        color: #2196f3;
+        cursor: pointer;
+        position: relative;
+    }
+    .menu-dropdown {
+        display: none;
+        position: absolute;
+        top: 60px; /* Adjust based on header height */
+        right: 0;
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 1000;
+        min-width: 200px;
+    }
+    .menu-dropdown.active {
+        display: block;
+    }
+    .menu-dropdown a {
+        display: block;
+        padding: 15px 20px;
+        text-decoration: none;
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        color: #333;
+        font-size: 1rem;
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s ease;
+    }
+    .menu-dropdown a:last-child {
+        border-bottom: none;
+    }
+    .menu-dropdown a:hover {
+        background-color: #f0f0f0;
+    }
+        .menu-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2196f3;
+            text-align: center;
+            flex-grow: 1;
+        }
+        /* Existing styles below */
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        header {
+            background: linear-gradient(90deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .content {
+            display: flex;
+            padding: 30px;
+            flex-wrap: wrap;
+        }
+        .chart-container {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            position: relative; /* Crucial for positioning the needle */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #bmiGauge {
+            width: 100%;
+            height: 300px;
+            max-width: 320px;
+            max-height: 320px;
+        }
+        .gauge-center {
+            position: absolute;
+            left: 50%;
+            top: 65%;
+            transform: translate(-50%,-50%);
+            text-align: center;
+            pointer-events: none; /* Allows clicks to pass through to canvas if needed */
+            width: 90%; /* Increased width for more text space */
+            z-index: 5; /* Adjusted: Above the needle and dot */
+        }
+        .gauge-bmi-value {
+            font-size: 2.5rem; /* Slightly reduced font size */
+            font-weight: 700;
+            color: #2196f3;
+            line-height: 1.1;
+        }
+        .gauge-bmi-category {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 4px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            display: inline-block;
+        }
+        .cat-underweight {
+            background: #4fc3f7;
+            color: #01579b;
+        }
+        .cat-normal {
+            background: #81c784;
+            color: #1b5e20;
+        }
+        .cat-overweight {
+            background: #ffb74d;
+            color: #e65100;
+        }
+        .cat-obese {
+            background: #e57373;
+            color: #b71c1c;
+        }
+
+        /* NEW NEEDLE STYLES */
+        .gauge-needle {
+            position: absolute;
+            bottom: 50%; /* Position at the center bottom of the chart container */
+            left: 50%;
+            transform-origin: bottom center; /* Pivot point for rotation */
+            width: 3px; /* Thinner needle */
+            height: 90px; /* Shorter needle */
+            background-color: #111; /* Color of the needle */
+            border-radius: 4px 4px 0 0; /* Rounded top, flat bottom */
+            z-index: 3; /* Below the text, above the canvas */
+            transition: transform 1.5s cubic-bezier(.4,2.08,.55,.44); /* Smooth transition for rotation */
+            opacity: 1; /* Removed opacity reduction for clarity, relies on position */
+        }
+
+        .gauge-center-dot {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            transform: translate(-50%, 50%); /* Center the dot over the needle pivot */
+            width: 16px;
+            height: 16px;
+            background-color: #333;
+            border-radius: 50%;
+            z-index: 4; /* Below the text, above the needle */
+        }
+
+        .info-container {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .progress-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .progress-title {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #444;
+        }
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            transition: width 1.5s ease-in-out;
+        }
+        .ranges {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 18px;
+            color: #666;
+            font-size: 1rem;
+        }
+        .ranges div {
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+        .interpretation {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+        .interpretation h3 {
+            color: #1976d2;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .interpretation p {
+            color: #333;
+            line-height: 1.6;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 0 30px 30px;
+        }
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-primary {
+            background: #2196f3;
+            color: white;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+        .btn-primary:hover {
+            background: #1976d2;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #2196f3;
+            border: 2px solid #2196f3;
+        }
+        .btn-outline:hover {
+            background: #e3f2fd;
+        }
+        /* Message overlay for missing data */
+        .data-missing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            z-index: 10;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 20px; /* Match container border radius */
+        }
+        .data-missing-overlay.hidden {
+            display: none;
+        }
+        .data-missing-overlay p {
+            margin-bottom: 20px;
+        }
+        .data-missing-overlay .btn {
+            margin-top: 15px;
+        }
+
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .gauge-center { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="special-header">
+    <a href="dashboard.html" class="logo" style="text-decoration:none;">
+  <img src="images/selfnutri.png" alt="Selfnutri Logo" style="height:38px;vertical-align:middle;margin-right:10px;">
+  <span style="font-size:1.8rem;font-weight:bold;font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;">
+    <span style="color:#111;">Self</span><span style="color:#2196f3;">nutri</span>
+  </span>
+</a>
+    <div class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="bmi.html">BMI</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="calorie-tracker.html">Calorie Tracker</a>
+        <a href="water-tracker.html">Water Tracker</a>
+        <a href="ai-chef.html">AI Chef</a>
+        <a href="menu.html">Profile</a>
+        <a href="#" id="signoutButton">Sign Out</a>
+      </div>
+    </div>
+  </div>
+
+    <div class="container" id="bmiContainer">
+        <header>
+            <h1>Your BMI Result</h1>
+            <p class="subtitle">Based on your height and weight information</p>
+        </header>
+        <div class="content">
+            <div class="chart-container">
+                <canvas id="bmiGauge"></canvas>
+                <div class="gauge-needle" id="bmiNeedle"></div> <!-- New Needle Element -->
+                <div class="gauge-center-dot"></div> <!-- New Center Dot Element -->
+                <div class="gauge-center" id="gaugeCenter">
+                </div>
+            </div>
+            <div class="info-container">
+                <div class="progress-container">
+                    <div class="progress-title">
+                        <span>BMI Range</span>
+                        <span id="bmiValueDisplay">--</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%; background: linear-gradient(90deg, #4fc3f7, #81c784, #ffb74d, #e57373);"></div>
+                    </div>
+                    <div class="ranges">
+                        <div>Underweight (&lt;18.5)</div>
+                        <div>Normal (18.5-24.9)</div>
+                        <div>Overweight (25-29.9)</div>
+                        <div>Obese (&gt;30)</div>
+                    </div>
+                </div>
+                <div class="interpretation">
+                    <h3><i class="fas fa-lightbulb"></i> What This Means</h3>
+                    <p id="bmiInterpretation">Please provide your height and weight in the profile to calculate your BMI.</p>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn btn-outline" onclick="window.location.href='profile.html'">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+            <button class="btn btn-primary" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-seedling"></i> Start Your Self Nutrition Journey
+            </button>
+        </div>
+        <!-- Data Missing Overlay -->
+        <div id="dataMissingOverlay" class="data-missing-overlay hidden">
+            <p>To calculate your BMI, please complete your profile with your height and current weight.</p>
+            <button class="btn btn-primary" onclick="window.location.href='profile.html'">
+                <i class="fas fa-user-edit"></i> Complete Profile
+            </button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+   const firebaseConfig = {
+    apiKey: "AIzaSyBhEHEgjRhj8NRkP1t4Ua53kcnFxaS5Zp8",
+    authDomain: "selfnutriapp.firebaseapp.com",
+    projectId: "selfnutriapp",
+    storageBucket: "selfnutriapp.firebasestorage.app",
+    messagingSenderId: "244812012239",
+    appId: "1:244812012239:web:74ff5518334352787575ba",
+    measurementId: "G-EMGEHKS4NH"
+};
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+async function getProfileDataFromFirestore(user) {
+    try {
+        const docSnap = await db.collection("users").doc(user.uid).get();
+        if (docSnap.exists) {
+            const data = docSnap.data();
+            return {
+                height: parseFloat(data.height) || 0,
+                weight: parseFloat(data.weight) || 0,
+                weightUnit: 'kg',
+                heightUnit: 'cm'
+            };
+        } else {
+            return null;
+        }
+    } catch (e) {
+        return null;
+    }
+}
+
+function calculateBMI(weight, height, weightUnit, heightUnit) {
+    let w = parseFloat(weight);
+    let h = parseFloat(height);
+
+    if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return '--';
+
+    if (weightUnit === 'lbs') w = w * 0.453592;
+    if (heightUnit === 'cm') {
+        h = h / 100;
+    } else if (heightUnit === 'ftin') {
+        const parts = String(height).split("'");
+        let feet = parseInt(parts[0]) || 0;
+        let inches = parseInt(parts[1]) || 0;
+        h = (feet * 12 + inches) * 0.0254;
+    }
+
+    if (h === 0) return '--';
+
+    return (w / (h * h)).toFixed(2);
+}
+
+function getBMICategoryAndInterpretation(bmi) {
+    let category = 'N/A';
+    let catClass = '';
+    let interpretation = 'Please provide your height and weight in the profile to calculate your BMI.';
+
+    if (isNaN(bmi) || bmi === '--') {
+        return { category, catClass, interpretation };
+    }
+
+    if (bmi < 18.5) {
+        category = 'Underweight';
+        catClass = 'cat-underweight';
+        interpretation = 'Your BMI suggests you are underweight. This might indicate nutritional deficiencies or other health issues. It\'s advisable to consult with a healthcare professional or nutritionist for guidance.';
+    } else if (bmi < 25) {
+        category = 'Normal weight';
+        catClass = 'cat-normal';
+        interpretation = 'Your BMI is in the healthy weight range. Congratulations! Continue with your healthy lifestyle habits to maintain this.';
+    } else if (bmi < 30) {
+        category = 'Overweight';
+        catClass = 'cat-overweight';
+        interpretation = 'Your BMI falls into the overweight category. This may increase your risk of certain health conditions. Consider focusing on a balanced diet and increased physical activity, or consult a nutritionist.';
+    } else {
+        category = 'Obese';
+        catClass = 'cat-obese';
+        interpretation = 'Your BMI indicates obesity. This significantly increases your risk for various health problems. It is highly recommended to seek professional advice from a doctor or dietitian to develop a suitable plan.';
+    }
+    return { category, catClass, interpretation };
+}
+
+let gaugeChart;
+
+async function updateBMIVisualization(user) {
+    const profileData = await getProfileDataFromFirestore(user);
+    const dataMissingOverlay = document.getElementById('dataMissingOverlay');
+    const bmiNeedle = document.getElementById('bmiNeedle');
+
+    let bmiValue = '--';
+    let bmiCategory = 'N/A';
+    let catClass = '';
+    let interpretation = 'Please provide your height and weight in the profile to calculate your BMI.';
+
+    if (profileData && profileData.weight > 0 && profileData.height > 0) {
+        dataMissingOverlay.classList.add('hidden');
+        bmiValue = calculateBMI(profileData.weight, profileData.height, profileData.weightUnit, profileData.heightUnit);
+        const result = getBMICategoryAndInterpretation(parseFloat(bmiValue));
+        bmiCategory = result.category;
+        catClass = result.catClass;
+        interpretation = result.interpretation;
+    } else {
+        dataMissingOverlay.classList.remove('hidden');
+        document.getElementById('bmiValueDisplay').textContent = '--';
+        document.getElementById('gaugeCenter').innerHTML = `
+            <div class="gauge-bmi-value">--</div>
+            <div class="gauge-bmi-category">N/A</div>
+        `;
+        document.getElementById('bmiInterpretation').textContent = interpretation;
+        document.querySelector('.progress-fill').style.width = `0%`;
+        bmiNeedle.style.transform = `translateX(-50%) rotate(225deg)`;
+        if (gaugeChart) {
+            gaugeChart.destroy();
+            gaugeChart = null;
+        }
+        return;
+    }
+
+    document.getElementById('bmiValueDisplay').textContent = bmiValue;
+    document.getElementById('gaugeCenter').innerHTML = `
+        <div class="gauge-bmi-value">${bmiValue}</div>
+        <div class="gauge-bmi-category ${catClass}">${bmiCategory}</div>
+    `;
+    document.getElementById('bmiInterpretation').textContent = interpretation;
+
+    const progressBarFill = document.querySelector('.progress-fill');
+    if (bmiValue !== '--') {
+        const percentage = (parseFloat(bmiValue) / 40) * 100;
+        progressBarFill.style.width = `${Math.min(percentage, 100)}%`;
+    } else {
+        progressBarFill.style.width = `0%`;
+    }
+
+    const ctx = document.getElementById('bmiGauge').getContext('2d');
+    if (gaugeChart) {
+        gaugeChart.destroy();
+    }
+
+    const gaugeDataSegments = [
+        { value: 20, color: '#4ee59d' },   // 0-20
+        { value: 20, color: '#7fffea' },   // 20-40
+        { value: 20, color: '#fff685' },   // 40-60
+        { value: 20, color: '#ffb366' },   // 60-80
+        { value: 20, color: '#ff3d57' }    // 80-100
+    ];
+
+    gaugeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: gaugeDataSegments.map(s => s.value),
+                backgroundColor: gaugeDataSegments.map(s => s.color),
+                circumference: 180,    // Half circle
+                rotation: 270,         // Start at bottom center
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',           // Thicker arc
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            animation: false
+        },
+        plugins: []
+    });
+    gaugeChart.update();
+
+    let needleRotationAngle = 270;
+    if (bmiValue !== '--') {
+        const minBmiForGauge = 10;
+        const maxBmiForGauge = 40;
+        const angleRange = 180;
+        const startAngle = 270;
+        let mappedBmi = parseFloat(bmiValue);
+        if (mappedBmi < minBmiForGauge) mappedBmi = minBmiForGauge;
+        if (mappedBmi > maxBmiForGauge) mappedBmi = maxBmiForGauge;
+        needleRotationAngle = startAngle + ((mappedBmi - minBmiForGauge) / (maxBmiForGauge - minBmiForGauge)) * angleRange;
+    }
+    bmiNeedle.style.transform = `translateX(-50%) rotate(${needleRotationAngle}deg)`;
+}
+
+// Dropdown menu logic
+const menuToggle = document.getElementById('menuToggle');
+const menuDropdown = document.getElementById('menuDropdown');
+
+menuToggle.addEventListener('click', function(event) {
+    event.stopPropagation();
+    menuDropdown.classList.toggle('active');
+});
+
+document.addEventListener('click', function(event) {
+    if (!menuDropdown.contains(event.target) && !menuToggle.contains(event.target)) {
+        menuDropdown.classList.remove('active');
+    }
+});
+
+const menuLinks = menuDropdown.querySelectorAll('a');
+menuLinks.forEach(link => {
+    link.addEventListener('click', function() {
+        menuDropdown.classList.remove('active');
+    });
+});
+
+ // Sign Out Functionality
+    document.getElementById('signoutButton').addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            await auth.signOut();
+            console.log('User signed out.');
+            window.location.href = 'signin.html';
+        } catch (error) {
+            console.error('Sign out error:', error.message);
+            alert('Error signing out. Please try again.');
+        }
+    });
+
+// --- Initial Load Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = 'signin.html';
+            return;
+        }
+        // Check if profile is complete
+        const docSnap = await db.collection("users").doc(user.uid).get();
+        const profileComplete = docSnap.exists && docSnap.data().profileComplete === true;
+        if (!profileComplete) {
+            window.location.href = 'profile.html';
+            return;
+        }
+        // User is authenticated and profile is complete, update BMI visualization
+        updateBMIVisualization(user);
+    });
+});
+    
+    </script>
+    <div class="footer">
+    &copy; 2025 Selfnutri. All rights reserved.
+  </div>
+</body>
+</html>

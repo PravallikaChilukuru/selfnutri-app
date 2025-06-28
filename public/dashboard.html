@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>selfnutri-Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/selfnutri-favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js is no longer needed for these sections, but kept in case other charts are added -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script> -->
+    <style>
+        :root {
+            --selfnutri-blue: #2196f3;
+            --selfnutri-blue-dark: #1976d2;
+            --selfnutri-blue-light: #e3f2fd;
+            --selfnutri-dark: #222;
+            --selfnutri-text-secondary: #666;
+            --selfnutri-border-light: #e0e3e8;
+            --selfnutri-bg: #f5f7fa;
+
+            /* Dashboard Specific Colors */
+            --dashboard-card-bg: #ffffff;
+            --dashboard-progress-bg: #e0e0e0;
+            --dashboard-progress-fill: var(--selfnutri-blue);
+            --dashboard-calorie-highlight: #4CAF50; /* Green for goal */
+            --dashboard-bmi-normal: #4CAF50;
+            --dashboard-bmi-underweight: #FFC107; /* Amber */
+            --dashboard-bmi-overweight: #FF9800; /* Orange */
+            --dashboard-bmi-obese: #F44336; /* Red */
+
+            /* Chart Colors (retained for consistency, even if not used by charts now) */
+            --chart-line-color: #2196f3;
+            --chart-fill-color: rgba(33, 150, 243, 0.2);
+            --chart-text-color: #333;
+            --chart-grid-color: #eee;
+            --chart-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            /* Macro Chart Colors (retained for consistency, even if not used by charts now) */
+            --macro-carbs: #FFC107; /* Amber */
+            --macro-protein: #4CAF50; /* Green */
+            --macro-fat: #F44336; /* Red */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--selfnutri-dark);
+            min-height: 100vh;
+            display: flex;
+            font-size: 1.075rem;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        * {
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+
+        .footer {
+      margin-top: 40px;
+      color: #888;
+      font-size: 0.95em;
+      text-align: center;
+      width: 100%;
+    }
+
+        /* --- Header (consistent) --- */
+        .special-header {
+            width: 95%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            border-radius: 18px;
+            margin: 20px auto;
+            box-sizing: border-box;
+            max-width: 1200px; /* Limit header width */ 
+            transition: box-shadow 0.3s ease;
+            z-index: 2000;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2196f3;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .logo i {
+            margin-right: 8px;
+            color: #2196f3;
+        }
+        .menu-toggle {
+            font-size: 1.8rem;
+            color: #2196f3;
+            cursor: pointer;
+            position: relative;
+        }
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            top: 60px; /* Adjust based on header height */
+            right: 0;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1000;
+            min-width: 200px;
+        }
+        .menu-dropdown.active {
+            display: block;
+        }
+        .menu-dropdown a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #333;
+            font-size: 1rem;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease;
+        }
+        .menu-dropdown a:last-child {
+            border-bottom: none;
+        }
+        .menu-dropdown a:hover {
+            background-color: #f0f0f0;
+        }
+        .navbar {
+            position: relative;
+            z-index: 2000;
+        }
+        .dashboard-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--selfnutri-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 80px); /* Adjust for header height */
+        }
+        
+        /* --- Dashboard Container --- */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1100px; /* Wider for more cards/charts */
+            margin: 20px auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 25px;
+            background: transparent;
+        }
+
+        /* --- Dashboard Cards --- */
+        .dashboard-card {
+            background: var(--dashboard-card-bg);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--selfnutri-border-light);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: var(--selfnutri-blue-light);
+            color: var(--selfnutri-blue-dark);
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--selfnutri-border-light);
+            text-align: center;
+        }
+
+        .card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* --- Specific Card Styles --- */
+
+        /* Weight Progress Card */
+        .weight-progress .progress-info {
+            font-size: 1.1rem;
+            color: var(--selfnutri-text-secondary);
+            margin-bottom: 15px;
+        }
+        .weight-progress .progress-info span {
+            font-weight: 600;
+            color: var(--selfnutri-dark);
+        }
+        .weight-progress .time-estimate {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--selfnutri-blue-dark);
+            margin-bottom: 20px;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--dashboard-progress-bg);
+            border-radius: 10px;
+            height: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, var(--selfnutri-blue-light), var(--dashboard-progress-fill));
+            border-radius: 10px;
+            transition: width 1s ease-out;
+        }
+
+        /* Calorie Goal Card */
+        .calorie-goal .calorie-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dashboard-calorie-highlight);
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 10px;
+        }
+        .calorie-goal .calorie-note {
+            font-size: 0.9rem;
+            color: var(--selfnutri-text-secondary);
+            margin: 0;
+        }
+
+        /* BMI Status Card */
+        .bmi-status .bmi-display {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--selfnutri-dark);
+            margin-bottom: 10px;
+        }
+        .bmi-status .bmi-category {
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 5px 15px;
+            border-radius: 8px;
+            color: white;
+            margin: 0;
+        }
+        /* BMI category specific colors (set by JS) */
+        .bmi-status .bmi-category.underweight { background-color: var(--dashboard-bmi-underweight); }
+        .bmi-status .bmi-category.normal { background-color: var(--dashboard-bmi-normal); }
+        .bmi-status .bmi-category.overweight { background-color: var(--dashboard-bmi-overweight); }
+        .bmi-status .bmi-category.obese { background-color: var(--dashboard-bmi-obese); }
+
+        /* Chart Card Replacement Specific Styles */
+        .chart-card .card-content {
+            /* min-height: 250px; Remove or reduce if not needed for text content */
+            justify-content: center;
+            position: relative;
+        }
+        /* Hide canvas when message is shown (still relevant for placeholders) */
+        .chart-message + canvas {
+            display: none;
+        }
+        .chart-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--selfnutri-text-secondary);
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 5;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 15px;
+        }
+        .chart-message p {
+            margin-bottom: 15px;
+        }
+        .chart-message .btn {
+            background-color: var(--selfnutri-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            display: inline-block;
+        }
+        .chart-message .btn:hover {
+            background-color: var(--selfnutri-blue-dark);
+        }
+
+        /* New styles for text-based chart replacements */
+        .chart-replacement-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .chart-replacement-item {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--selfnutri-border-light);
+        }
+        .chart-replacement-item:last-child {
+            border-bottom: none;
+        }
+
+        .chart-replacement-item .label {
+            font-weight: 600;
+            color: var(--selfnutri-dark);
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .chart-replacement-item .value {
+            font-weight: 500;
+            color: var(--selfnutri-blue);
+            text-align: right;
+        }
+        .chart-replacement-item.highlight .value {
+             font-size: 1.1em;
+             font-weight: 700;
+        }
+
+
+        /* Quick Insights Card */
+        .quick-insights .card-content {
+            padding: 15px;
+            align-items: stretch; /* Stretch items horizontally */
+        }
+        .insight-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--selfnutri-border-light);
+            font-size: 1rem;
+        }
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+        .insight-item .icon {
+            color: var(--selfnutri-blue-dark);
+            margin-right: 10px;
+            font-size: 1.2em;
+            width: 25px; /* Fixed width for icons */
+            text-align: center;
+        }
+        .insight-item .label {
+            font-weight: 600;
+            color: var(--selfnutri-dark);
+            flex-grow: 1; /* Pushes value to the right */
+            text-align: left; /* Align label left */
+        }
+        .insight-item .value {
+            color: var(--selfnutri-blue);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        /* Motivational Card */
+        .motivational-card .card-content {
+            justify-content: center;
+        }
+        .motivational-card .quote {
+            font-size: 1.3rem;
+            font-style: italic;
+            color: var(--selfnutri-dark);
+            margin-bottom: 10px;
+            line-height: 1.4;
+            opacity: 1; /* Default to visible */
+            transition: opacity 0.5s ease-in-out;
+        }
+        .motivational-card .author {
+            font-size: 1rem;
+            color: var(--selfnutri-text-secondary);
+            font-weight: 500;
+            opacity: 1; /* Default to visible */
+            transition: opacity 0.5s ease-in-out;
+        }
+
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+                gap: 20px;
+            }
+            .special-header .title {
+                font-size: 1.4rem;
+                margin-left: 30px;
+            }
+            .special-header .icon-left {
+                font-size: 1.3rem;
+                left: 15px;
+            }
+            .chart-card .card-content {
+                min-height: 200px; /* Adjust min-height for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="special-header">
+    <a href="dashboard.html" class="logo" style="text-decoration:none;">
+  <img src="images/selfnutri.png" alt="Selfnutri Logo" style="height:38px;vertical-align:middle;margin-right:10px;">
+  <span style="font-size:1.8rem;font-weight:bold;font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;">
+    <span style="color:#111;">Self</span><span style="color:#2196f3;">nutri</span>
+    </span>
+  </span>
+  </a>
+<div class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="bmi.html">BMI</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="calorie-tracker.html">Calorie Tracker</a>
+        <a href="water-tracker.html">Water Tracker</a>
+        <a href="ai-chef.html">AI Chef</a>
+        <a href="menu.html">Profile</a>
+        <a href="#" id="signoutButton">Sign Out</a>
+      </div>
+    </div>
+  </div>
+
+    <div class="dashboard-container">
+
+        <div class="dashboard-card weight-progress">
+            <div class="card-header">Weight Goal Progress</div>
+            <div class="card-content">
+                <div class="progress-info">
+                    <span id="currentWeightDashboard">-- lbs</span> to <span id="targetWeightDashboard">-- lbs</span>
+                </div>
+                <div class="time-estimate">Estimated time: <span id="timeToTarget">--</span></div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="weightProgressBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card calorie-goal">
+            <div class="card-header">Daily Calorie Goal</div>
+            <div class="card-content">
+                <div class="calorie-display" id="dailyCalorieGoal">-- kcal</div>
+                <p class="calorie-note">Based on your profile and activity level.</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card bmi-status">
+            <div class="card-header">Your BMI</div>
+            <div class="card-content">
+                <div class="bmi-display" id="bmiDashboard">--</div>
+                <p class="bmi-category" id="bmiCategory">--</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card quick-insights">
+            <div class="card-header">Quick Insights</div>
+            <div class="card-content">
+                <div class="insight-item">
+                    <i class="fas fa-calendar-check icon"></i>
+                    <span class="label">Target Date:</span>
+                    <span class="value" id="targetDateDisplay">--</span>
+                </div>
+                <div class="insight-item">
+                    <i class="fas fa-arrow-right-arrow-left icon"></i>
+                    <span class="label">Weekly Change:</span>
+                    <span class="value" id="weeklyChangeDisplay">--</span>
+                </div>
+                <div class="insight-item">
+                    <i class="fas fa-balance-scale-right icon"></i>
+                    <span class="label">Difference:</span>
+                    <span class="value" id="weightDifferenceDisplay">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card chart-card">
+            <div class="card-header">Projected Weight Journey</div>
+            <div class="card-content" id="weightJourneyChartContainer">
+                <!-- Content will be generated by JS -->
+                <p class="chart-info">This is an estimated path based on your calorie goal.</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card chart-card">
+            <div class="card-header">Estimated Macro Distribution</div>
+            <div class="card-content" id="macroChartContainer">
+                <!-- Content will be generated by JS -->
+                <p class="chart-info">A common macronutrient split for your calorie goal.</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card motivational-card">
+            <div class="card-header">Motivation</div>
+            <div class="card-content">
+                <p id="motivationalQuote" class="quote">Loading quote...</p>
+                <span id="quoteAuthor" class="author"></span>
+            </div>
+        </div>
+
+    </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBhEHEgjRhj8NRkP1t4Ua53kcnFxaS5Zp8",
+        authDomain: "selfnutriapp.firebaseapp.com",
+        projectId: "selfnutriapp",
+        storageBucket: "selfnutriapp.firebasestorage.app",
+        messagingSenderId: "244812012239",
+        appId: "1:244812012239:web:74ff5518334352787575ba",
+        measurementId: "G-EMGEHKS4NH"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();// --- Utility Functions (Copied from Profile Page & Extended) ---
+
+    // Helper to check if a value is a valid, positive number
+    function isValidNumber(value) {
+        const num = parseFloat(value);
+        return !isNaN(num) && num > 0;
+    }
+
+    // Convert weight to kg (now always expects kg)
+    function convertWeightToKg(weight, unit) {
+        let val = parseFloat(weight);
+        if (isNaN(val)) return 0;
+        // Always treat as kg
+        return val;
+    }
+    // filepath: c:\Users\prava\OneDrive\Desktop\selfnutriapp\dashboard.html
+    function showChartMessage(containerId, message) {
+        const container = document.getElementById(containerId);
+        let messageDiv = container.querySelector('.chart-message');
+        if (!messageDiv) {
+            messageDiv = document.createElement('div');
+            messageDiv.className = 'chart-message';
+            messageDiv.innerHTML = `<p>${message}</p><a href="profile.html" class="btn">Complete Profile</a>`;
+            container.prepend(messageDiv);
+        }
+        // Hide any dynamic content placeholder within the container
+        const chartContent = container.querySelector('.chart-replacement-content');
+        if (chartContent) chartContent.style.display = 'none';
+        const chartInfo = container.querySelector('.chart-info');
+        if (chartInfo) chartInfo.style.display = 'none';
+    }
+
+    function hideChartMessage(containerId) {
+        const container = document.getElementById(containerId);
+        const messageDiv = container.querySelector('.chart-message');
+        if (messageDiv) {
+            messageDiv.remove();
+        }
+        const chartContent = container.querySelector('.chart-replacement-content');
+        if (chartContent) chartContent.style.display = 'flex'; // Show dynamic content
+        const chartInfo = container.querySelector('.chart-info');
+        if (chartInfo) chartInfo.style.display = 'block';
+    }
+    // Convert weight from kg to original unit (now always returns kg)
+    function convertWeightFromKg(weightKg, unit) {
+        let val = parseFloat(weightKg);
+        if (isNaN(val)) return 0;
+        // Always treat as kg
+        return val;
+    }
+
+    // Convert height to cm (now always expects cm)
+    function convertHeightToCm(height, unit) {
+        if (!height) return 0;
+        // Always treat as cm
+        return parseFloat(height);
+    }
+
+    // Calculate BMI (all in kg and cm)
+    function calculateBMI(weight, height, weightUnit, heightUnit) {
+        const wKg = convertWeightToKg(weight, weightUnit);
+        const hM = convertHeightToCm(height, heightUnit) / 100; // Convert cm to meters
+
+        if (wKg <= 0 || hM <= 0) return '--';
+        const bmi = (wKg / (hM * hM));
+        return isNaN(bmi) ? '--' : bmi.toFixed(2);
+    }
+
+    // Determine BMI Category
+    function getBMICategory(bmi) {
+        if (isNaN(bmi) || bmi === '--') return { category: 'N/A', class: '' };
+        if (bmi < 18.5) return { category: 'Underweight', class: 'underweight' };
+        if (bmi >= 18.5 && bmi < 25) return { category: 'Normal weight', class: 'normal' };
+        if (bmi >= 25 && bmi < 30) return { category: 'Overweight', class: 'overweight' };
+        return { category: 'Obese', class: 'obese' };
+    }
+
+    // Calculate Basal Metabolic Rate (BMR) - Mifflin-St Jeor Equation (kg, cm)
+    function calculateBMR(weightKg, heightCm, age, gender) {
+        if (weightKg <= 0 || heightCm <= 0 || age <= 0 || !gender) return 0;
+        let bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age);
+        return gender.toLowerCase() === 'male' ? bmr + 5 : bmr - 161;
+    }
+
+    // Calculate Total Daily Energy Expenditure (TDEE)
+    function calculateTDEE(bmr, activityLevel) {
+        const activityFactors = {
+            'sedentary': 1.2,
+            'light': 1.375,
+            'moderate': 1.55,
+            'active': 1.725,
+            'very-active': 1.9
+        };
+        return bmr * (activityFactors[activityLevel?.toLowerCase()] || 1.2); // Default to sedentary if invalid
+    }
+
+    // --- Chart & Dashboard Population Logic ---
+
+    async function populateDashboard() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Fetch user profile from Firestore
+    const docSnap = await db.collection("users").doc(user.uid).get();
+    if (!docSnap.exists) {
+        window.location.href = 'profile.html';
+        return;
+    }
+    const data = docSnap.data();
+    console.log("Profile data from Firestore:", data);
+
+    // Always use kg and cm for calculations and display
+    const weightUnit = 'kg';
+    const heightUnit = 'cm';
+
+    const isProfileCompleteForCharts = data &&
+    isValidNumber(data.age) &&
+    isValidNumber(data.height) &&
+    isValidNumber(data.weight) &&
+    isValidNumber(data.targetWeight) &&
+    data.gender &&
+    (data.activityLevel || data.activity); // Accept either field
+
+    if (!isProfileCompleteForCharts) {
+        document.getElementById('currentWeightDashboard').textContent = '-- kg';
+        document.getElementById('targetWeightDashboard').textContent = '-- kg';
+        document.getElementById('timeToTarget').textContent = '--';
+        document.getElementById('dailyCalorieGoal').textContent = '-- kcal';
+        document.getElementById('bmiDashboard').textContent = '--';
+        document.getElementById('bmiCategory').textContent = '--';
+        document.getElementById('bmiCategory').className = 'bmi-category';
+        document.getElementById('targetDateDisplay').textContent = '--';
+        document.getElementById('weeklyChangeDisplay').textContent = '--';
+        document.getElementById('weightDifferenceDisplay').textContent = '--';
+        document.getElementById('weightProgressBar').style.width = `0%`;
+
+        showChartMessage('weightJourneyChartContainer', 'Please complete your profile (initial weight, current weight, target weight, height, age, gender, activity level) to see your projected weight journey.');
+        showChartMessage('macroChartContainer', 'Please complete your profile to see your estimated macro distribution.');
+        return;
+    } else {
+        hideChartMessage('weightJourneyChartContainer');
+        hideChartMessage('macroChartContainer');
+    }
+
+        // --- Update Dashboard Cards ---
+
+        // BMI Status
+        const bmi = calculateBMI(data.weight, data.height, weightUnit, heightUnit);
+        const bmiCategory = getBMICategory(bmi);
+        document.getElementById('bmiDashboard').textContent = bmi;
+        const bmiCategoryElement = document.getElementById('bmiCategory');
+        bmiCategoryElement.textContent = bmiCategory.category;
+        bmiCategoryElement.className = `bmi-category ${bmiCategory.class}`;
+
+        // Weight Goal Progress
+        document.getElementById('currentWeightDashboard').textContent = `${parseFloat(data.weight).toFixed(1)} kg`;
+        document.getElementById('targetWeightDashboard').textContent = `${parseFloat(data.targetWeight).toFixed(1)} kg`;
+
+        const currentWeightKg = convertWeightToKg(data.weight, weightUnit);
+        const targetWeightKg = convertWeightToKg(data.targetWeight, weightUnit);
+
+        // Set initialWeightKg ONLY IF it's not already set, or if the user explicitly reset their profile
+        let initialWeightKg = localStorage.getItem('initialWeightKg');
+        if (!isValidNumber(initialWeightKg)) {
+            initialWeightKg = currentWeightKg;
+            localStorage.setItem('initialWeightKg', initialWeightKg);
+        } else {
+            initialWeightKg = parseFloat(initialWeightKg);
+        }
+
+        let progressPercentage = 0;
+        const totalWeightChangeNeeded = Math.abs(initialWeightKg - targetWeightKg);
+        const currentWeightChangeMade = Math.abs(currentWeightKg - initialWeightKg);
+
+        if (totalWeightChangeNeeded > 0) {
+            if ((initialWeightKg > targetWeightKg && currentWeightKg <= initialWeightKg) ||
+                (initialWeightKg < targetWeightKg && currentWeightKg >= initialWeightKg)) {
+                progressPercentage = (currentWeightChangeMade / totalWeightChangeNeeded) * 100;
+            } else if ((initialWeightKg > targetWeightKg && currentWeightKg > initialWeightKg) ||
+                (initialWeightKg < targetWeightKg && currentWeightKg < initialWeightKg)) {
+                progressPercentage = 0;
+            }
+        } else {
+            progressPercentage = 100;
+        }
+
+        progressPercentage = Math.min(100, Math.max(0, progressPercentage));
+        document.getElementById('weightProgressBar').style.width = `${progressPercentage}%`;
+
+        // Calorie Goal
+        const bmr = calculateBMR(currentWeightKg, convertHeightToCm(data.height, heightUnit), data.age, data.gender);
+        const tdee = calculateTDEE(bmr, data.activityLevel);
+
+        let dailyCalorieGoal = tdee;
+        const weightDifferenceToTargetKg = currentWeightKg - targetWeightKg;
+
+        const targetDifferenceThreshold = 0.5;
+        if (isValidNumber(targetWeightKg) && Math.abs(weightDifferenceToTargetKg) > targetDifferenceThreshold) {
+            if (weightDifferenceToTargetKg > 0) {
+                dailyCalorieGoal = tdee - 500;
+            } else {
+                dailyCalorieGoal = tdee + 500;
+            }
+        } else {
+            dailyCalorieGoal = tdee;
+        }
+        dailyCalorieGoal = Math.max(1200, Math.round(dailyCalorieGoal));
+
+        document.getElementById('dailyCalorieGoal').textContent = `${dailyCalorieGoal} kcal`;
+
+        // Estimated time to target & Weekly Change
+        let weeklyChangeKg = (dailyCalorieGoal - tdee) * 7 / 7700;
+
+        let timeToTargetText = '--';
+        let targetDateText = '--';
+
+        if (isValidNumber(targetWeightKg) && Math.abs(weightDifferenceToTargetKg) > targetDifferenceThreshold) {
+            if (Math.abs(weeklyChangeKg) > 0.05) {
+                const weeksToTarget = Math.abs(weightDifferenceToTargetKg / weeklyChangeKg);
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() + Math.round(weeksToTarget * 7));
+                timeToTargetText = `${Math.round(weeksToTarget)} weeks`;
+                targetDateText = targetDate.toLocaleDateString();
+            } else {
+                timeToTargetText = `Very slow progress`;
+                targetDateText = `N/A`;
+            }
+        } else {
+            timeToTargetText = `Goal Reached!`;
+            targetDateText = `Today`;
+            weeklyChangeKg = 0;
+        }
+
+        document.getElementById('timeToTarget').textContent = timeToTargetText;
+        document.getElementById('targetDateDisplay').textContent = targetDateText;
+
+        const weeklyChangeSign = weeklyChangeKg > 0 ? '+' : (weeklyChangeKg < 0 ? '' : '');
+        document.getElementById('weeklyChangeDisplay').textContent = `${weeklyChangeSign}${convertWeightFromKg(weeklyChangeKg, weightUnit).toFixed(1)} kg`;
+        document.getElementById('weightDifferenceDisplay').textContent = `${convertWeightFromKg(Math.abs(currentWeightKg - targetWeightKg), weightUnit).toFixed(1)} kg`;
+
+        // --- Replaced Chart Sections with Text Summaries ---
+
+        // Projected Weight Journey Section
+        const weightJourneyContainer = document.getElementById('weightJourneyChartContainer');
+        weightJourneyContainer.innerHTML = '';
+
+        if (!isProfileCompleteForCharts) {
+            showChartMessage('weightJourneyChartContainer', 'Please complete your profile to see your projected weight journey.');
+        } else {
+            hideChartMessage('weightJourneyChartContainer');
+            const journeyContent = document.createElement('div');
+            journeyContent.className = 'chart-replacement-content';
+            journeyContent.innerHTML = `
+                <div class="chart-replacement-item">
+                    <span class="label">Starting Weight:</span>
+                    <span class="value">${convertWeightFromKg(initialWeightKg, weightUnit).toFixed(1)} kg</span>
+                </div>
+                <div class="chart-replacement-item">
+                    <span class="label">Current Weight:</span>
+                    <span class="value">${parseFloat(data.weight).toFixed(1)} kg</span>
+                </div>
+                <div class="chart-replacement-item highlight">
+                    <span class="label">Target Weight:</span>
+                    <span class="value">${parseFloat(data.targetWeight).toFixed(1)} kg</span>
+                </div>
+                <div class="chart-replacement-item">
+                    <span class="label">Projected Weekly Change:</span>
+                    <span class="value">${weeklyChangeSign}${convertWeightFromKg(weeklyChangeKg, weightUnit).toFixed(1)} kg/week</span>
+                </div>
+                <div class="chart-replacement-item">
+                    <span class="label">Time to Target:</span>
+                    <span class="value">${timeToTargetText}</span>
+                </div>
+            `;
+            weightJourneyContainer.appendChild(journeyContent);
+            const chartInfoP = document.createElement('p');
+            chartInfoP.className = 'chart-info';
+            chartInfoP.textContent = 'This is an estimated path based on your calorie goal.';
+            weightJourneyContainer.appendChild(chartInfoP);
+        }
+
+        // Estimated Macro Distribution Section
+        const macroChartContainer = document.getElementById('macroChartContainer');
+        macroChartContainer.innerHTML = '';
+
+        if (!isProfileCompleteForCharts || !isValidNumber(dailyCalorieGoal) || dailyCalorieGoal <= 0) {
+            showChartMessage('macroChartContainer', 'Insufficient calorie goal data for the macro distribution chart.');
+        } else {
+            hideChartMessage('macroChartContainer');
+
+            const carbsPercentage = 0.40;
+            const proteinPercentage = 0.30;
+            const fatPercentage = 0.30;
+
+            const carbsCalories = dailyCalorieGoal * carbsPercentage;
+            const proteinCalories = dailyCalorieGoal * proteinPercentage;
+            const fatCalories = dailyCalorieGoal * fatPercentage;
+
+            const carbsGrams = isValidNumber(carbsCalories) ? (carbsCalories / 4).toFixed(0) : 0;
+            const proteinGrams = isValidNumber(proteinCalories) ? (proteinCalories / 4).toFixed(0) : 0;
+            const fatGrams = isValidNumber(fatCalories) ? (fatCalories / 9).toFixed(0) : 0;
+
+            const macroContent = document.createElement('div');
+            macroContent.className = 'chart-replacement-content';
+            macroContent.innerHTML = `
+                <div class="chart-replacement-item">
+                    <span class="label">Daily Goal:</span>
+                    <span class="value">${dailyCalorieGoal} kcal</span>
+                </div>
+                <div class="chart-replacement-item">
+                    <span class="label">Carbohydrates:</span>
+                    <span class="value">${Math.round(carbsCalories)} kcal (${carbsGrams}g)</span>
+                </div>
+                <div class="chart-replacement-item">
+                    <span class="label">Protein:</span>
+                    <span class="value">${Math.round(proteinCalories)} kcal (${proteinGrams}g)</span>
+                </div>
+                <div class="chart-replacement-item">
+                    <span class="label">Fats:</span>
+                    <span class="value">${Math.round(fatCalories)} kcal (${fatGrams}g)</span>
+                </div>
+            `;
+            macroChartContainer.appendChild(macroContent);
+            const chartInfoP = document.createElement('p');
+            chartInfoP.className = 'chart-info';
+            chartInfoP.textContent = 'A common macronutrient split for your calorie goal.';
+            macroChartContainer.appendChild(chartInfoP);
+        }
+
+        // Motivational Quotes (always active)
+        const quotes = [
+            { quote: "The only bad workout is the one that didn't happen.", author: "Unknown" },
+            { quote: "Take care of your body. It’s the only place you have to live.", author: "Jim Rohn" },
+            { quote: "Your body can stand almost anything. It’s your mind that you have to convince.", author: "Unknown" },
+            { quote: "Strive for progress, not perfection.", author: "Unknown" },
+            { quote: "The journey of a thousand miles begins with a single step.", author: "Lao Tzu" }
+        ];
+
+        let currentQuoteIndex = 0;
+        const quoteElement = document.getElementById('motivationalQuote');
+        const authorElement = document.getElementById('quoteAuthor');
+
+        function displayNextQuote() {
+            quoteElement.style.opacity = 0;
+            authorElement.style.opacity = 0;
+
+            setTimeout(() => {
+                const q = quotes[currentQuoteIndex];
+                quoteElement.textContent = `"${q.quote}"`;
+                authorElement.textContent = `- ${q.author}`;
+                quoteElement.style.opacity = 1;
+                authorElement.style.opacity = 1;
+                currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+            }, 500);
+        }
+
+        displayNextQuote();
+        setInterval(displayNextQuote, 10000);
+    }
+
+        // JavaScript for dropdown menu toggle and close
+        const menuToggle = document.getElementById('menuToggle');
+        const menuDropdown = document.getElementById('menuDropdown');
+
+        menuToggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            menuDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!menuDropdown.contains(event.target) && !menuToggle.contains(event.target)) {
+                menuDropdown.classList.remove('active');
+            }
+        });
+
+        const menuLinks = menuDropdown.querySelectorAll('a');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                menuDropdown.classList.remove('active');
+            });
+        });
+
+        // --- Initial Load Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'signin.html';
+                    return;
+                }
+                // Call populateDashboard if user is signed in
+                await populateDashboard();
+
+        document.getElementById('signoutButton').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await auth.signOut();
+                window.location.href = 'signin.html';
+            } catch (error) {
+                alert('Error signing out. Please try again.');
+            }
+                });
+            });
+        });
+    </script>
+    <div class="footer">
+    &copy; 2025 Selfnutri. All rights reserved.
+  </div>
+</body>
+</html>

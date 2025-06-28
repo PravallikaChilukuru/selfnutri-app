@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Selfnutri- Water Tracker</title>
+  <link rel="icon" type="image/png" href="images/selfnutri-favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+      background: #f5f7fa;
+      font-size: 1.075rem;
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    /* New Header Styles from bmi.html */
+    .special-header {
+            width: 95%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            border-radius: 18px;
+            margin: 20px auto;
+            box-sizing: border-box;
+            max-width: 1200px; /* Limit header width */ 
+            transition: box-shadow 0.3s ease;
+            z-index: 2000;
+        }
+      .footer {
+      margin-top: 40px;
+      color: #888;
+      font-size: 0.95em;
+      text-align: center;
+      width: 100%;
+    }
+    .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #2196f3;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+    .logo i {
+        margin-right: 8px;
+        color: #2196f3;
+    }
+    .menu-toggle {
+        font-size: 1.8rem;
+        color: #2196f3;
+        cursor: pointer;
+        position: relative;
+         font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    }
+    .menu-dropdown {
+        display: none;
+        position: absolute;
+        top: 60px; /* Adjust based on header height */
+        right: 0;
+         font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 1000;
+        min-width: 200px;
+    }
+    .menu-dropdown.active {
+        display: block;
+    }
+    .menu-dropdown a {
+        display: block;
+        padding: 15px 20px;
+        text-decoration: none;
+        color: #333;
+        font-size: 1rem;
+        border-bottom: 1px solid #eee;
+         font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        transition: background-color 0.2s ease;
+    }
+    .menu-dropdown a:last-child {
+        border-bottom: none;
+    }
+    .menu-dropdown a:hover {
+        background-color: #f0f0f0;
+    }
+
+
+    /* Water Tracker specific styles */
+    .water-tracker-container {
+      max-width: 450px;
+      margin: 20px auto;
+      padding: 25px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #2196f3;
+      margin-bottom: 10px;
+    }
+
+    .goal-display {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .water-bottle-container {
+      width: 150px;
+      height: 250px;
+      border: 3px solid #b0e0e6;
+      border-radius: 10px 10px 50px 50px;
+      overflow: hidden;
+      position: relative;
+      background-color: #f0f8ff; /* Lightest blue for empty part */
+      margin-bottom: 25px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .water-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to top, #4dd0e1, #29b6f6); /* Water gradient */
+      transition: height 0.5s ease-out;
+      border-radius: 0 0 48px 48px; /* Match bottle base curve */
+    }
+
+    .current-amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2196f3;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px; /* Adjusted margin */
+      flex-wrap: wrap; /* Allow wrapping for smaller screens */
+    }
+
+    .control-button {
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(33,150,243,0.3);
+    }
+
+    .control-button:hover {
+      background-color: #1976d2;
+      transform: translateY(-2px);
+    }
+
+    .control-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .reset-button {
+      background-color: #f0f0f0;
+      color: #2196f3;
+      border: 2px solid #2196f3;
+      box-shadow: none;
+    }
+    .reset-button:hover {
+        background-color: #e3f2fd;
+        transform: translateY(-2px);
+    }
+
+    /* New custom input styles */
+    .custom-input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        max-width: 380px; /* Align with reminder settings */
+        margin-bottom: 25px; /* Space before reminder settings */
+    }
+
+    .custom-input-group input[type="number"] {
+        flex-grow: 1;
+        padding: 12px 15px;
+        border: 1px solid #b0e0e6;
+        border-radius: 10px;
+        font-size: 1rem;
+        color: #333;
+        text-align: center;
+        appearance: textfield; /* Standard property for compatibility */
+        -moz-appearance: textfield; /* Hide arrows in Firefox */
+    }
+    .custom-input-group input[type="number"]::-webkit-outer-spin-button,
+    .custom-input-group input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .add-custom-btn {
+        padding: 12px 20px;
+        border-radius: 10px;
+        background-color: #2196f3;
+        color: white;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 4px 10px rgba(33,150,243,0.3);
+    }
+    .add-custom-btn:hover {
+        background-color: #1976d2;
+        transform: translateY(-2px);
+    }
+
+
+    .reminder-settings {
+      background-color: #f0f8ff;
+      border: 1px solid #b0e0e6;
+      border-radius: 15px;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      /* margin-top moved up to custom-input-group */
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .setting-label {
+      font-weight: 600;
+      color: #2196f3;
+      font-size: 1rem;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(33,150,243,0.12);
+    }
+    input:checked + .slider {
+      background-color: #2196f3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .reminder-select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #b0e0e6;
+      font-size: 0.95rem;
+      color: #333;
+    }
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      z-index: 1100;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      font-size: 0.95rem;
+      white-space: nowrap; /* Prevent text wrapping */
+    }
+    .notification.show {
+      opacity: 1;
+    }
+    
+    @media (max-width: 500px) {
+      .special-header .title {
+        font-size: 1.5rem;
+        margin-left: 20px;
+      }
+      .special-header .icon-left {
+        left: 10px;
+      }
+      .special-header .icon-right {
+        margin-right: 5px;
+      }
+      .water-tracker-container {
+        padding: 15px;
+        margin: 15px auto;
+      }
+      .current-amount {
+        font-size: 2rem;
+      }
+      .controls {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .control-button {
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 1rem;
+      }
+      .custom-input-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .custom-input-group input,
+      .add-custom-btn {
+        width: 100%;
+      }
+      .reminder-settings {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="special-header">
+  <a href="dashboard.html" class="logo" style="text-decoration:none;">
+    <img src="images/selfnutri.png" alt="Selfnutri Logo" style="height:38px;vertical-align:middle;margin-right:10px;">
+    <span style="font-size:1.8rem;font-weight:bold; font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;">
+      <span style="color:#111;">Self</span><span style="color:#2196f3;">nutri</span>
+    </span>
+  </a>
+  <div class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+    <div class="menu-dropdown" id="menuDropdown">
+      <a href="bmi.html">BMI</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="calorie-tracker.html">Calorie Tracker</a>
+      <a href="water-tracker.html">Water Tracker</a>
+      <a href="ai-chef.html">AI Chef</a>
+      <a href="menu.html">Profile</a>
+      <a href="#" id="signoutButton">Sign Out</a>
+    </div>
+  </div>
+</div>
+
+  <div class="water-tracker-container">
+    <h1>Daily Water Intake</h1>
+    <p class="goal-display">Goal: <span id="dailyWaterGoal">2000</span> ml</p>
+
+    <div class="water-bottle-container">
+      <div class="water-fill" id="waterFill"></div>
+    </div>
+
+    <div class="current-amount"><span id="currentAmount">0</span> ml</div>
+
+    <div class="controls">
+      <button class="control-button" id="add250">+250 ml</button>
+      <button class="control-button" id="add500">+500 ml</button>
+      <button class="control-button reset-button" id="resetWaterBtn">Reset Daily</button>
+    </div>
+
+    
+
+    <div class="custom-input-group">
+        <input type="number" id="customWaterAmount" placeholder="Enter amount in ml" min="1">
+        <button class="add-custom-btn" id="addCustomWaterBtn">Add Custom Amount</button>
+    </div>
+
+    <div class="reminder-settings">
+      <div class="setting-item">
+        <span class="setting-label">Water Reminders</span>
+        <label class="switch">
+          <input type="checkbox" id="reminderSwitch">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="setting-item">
+        <span class="setting-label">Reminder Interval</span>
+        <select id="reminderInterval" class="reminder-select">
+          <option value="30">30 mins</option>
+          <option value="60" selected>1 hour</option>
+          <option value="90">1 hour 30 mins</option>
+          <option value="120">2 hours</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Popup -->
+  <div id="notification" class="notification"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Your Firebase configuration (MUST BE THE SAME AS OTHER FILES)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhEHEgjRhj8NRkP1t4Ua53kcnFxaS5Zp8",
+      authDomain: "selfnutriapp.firebaseapp.com",
+      projectId: "selfnutriapp",
+      storageBucket: "selfnutriapp.firebasestorage.app",
+      messagingSenderId: "244812012239",
+      appId: "1:244812012239:web:74ff5518334352787575ba",
+      measurementId: "G-EMGEHKS4NH"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const TOKEN_EXPIRATION_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+  
+
+class WaterTracker {
+    constructor(userId) {
+        this.userId = userId;
+        this.docRef = db.collection('waterTrackers').doc(this.userId);
+
+        this.dailyWaterGoal = 0; // Will be set from profile
+        this.currentAmount = 0;
+        this.lastResetDate = '';
+        this.reminderIntervalId = null;
+        this.goalReachedToday = false;
+
+        // DOM elements
+        this.dailyWaterGoalEl = document.getElementById('dailyWaterGoal');
+        this.waterFillEl = document.getElementById('waterFill');
+        this.currentAmountEl = document.getElementById('currentAmount');
+        this.add250Btn = document.getElementById('add250');
+        this.add500Btn = document.getElementById('add500');
+        this.resetWaterBtn = document.getElementById('resetWaterBtn');
+        this.reminderSwitch = document.getElementById('reminderSwitch');
+        this.reminderIntervalEl = document.getElementById('reminderInterval');
+        this.notificationEl = document.getElementById('notification');
+        this.customWaterAmountInput = document.getElementById('customWaterAmount');
+        this.addCustomWaterBtn = document.getElementById('addCustomWaterBtn');
+
+        this.add250Btn.addEventListener('click', () => this.addWater(250));
+        this.add500Btn.addEventListener('click', () => this.addWater(500));
+        this.resetWaterBtn.addEventListener('click', () => this.reset());
+        this.reminderSwitch.addEventListener('change', () => this.setReminder());
+        this.reminderIntervalEl.addEventListener('change', () => this.setReminder());
+        this.addCustomWaterBtn.addEventListener('click', () => this.addCustomWater());
+    }
+
+    async loadData() {
+    // Fetch profile data for dailyWaterGoal or calculate if not set
+    const profileDoc = await db.collection("users").doc(this.userId).get();
+    let profileGoal = 0;
+
+    if (profileDoc.exists) {
+        const profileData = profileDoc.data();
+        if (profileData.dailyWaterGoal) {
+            profileGoal = parseInt(profileData.dailyWaterGoal);
+        } else if (profileData.weight) {
+            // Calculate: 30ml per kg of body weight
+            profileGoal = Math.round(parseFloat(profileData.weight) * 30);
+            this.showNotification(`Your daily water goal is set to ${profileGoal} ml based on your weight.`);
+        }
+    }
+
+    if (!profileGoal || isNaN(profileGoal)) {
+        this.showNotification("Please set your weight in your profile for an automatic water goal.");
+        profileGoal = 2000; // fallback if nothing is available
+    }
+    this.dailyWaterGoal = profileGoal;
+
+        // Try to get water tracker data from Firestore
+        const doc = await this.docRef.get();
+        const today = new Date().toDateString();
+        if (doc.exists) {
+            const data = doc.data();
+            this.currentAmount = (data.lastResetDate === today) ? (data.currentAmount || 0) : 0;
+            this.lastResetDate = (data.lastResetDate === today) ? today : today;
+            this.goalReachedToday = (data.lastResetDate === today) ? (data.goalReachedToday || false) : false;
+            this.reminderSwitch.checked = !!data.reminderEnabled;
+            this.reminderIntervalEl.value = data.reminderInterval || "60";
+        } else {
+            // First time user, set defaults
+            this.currentAmount = 0;
+            this.lastResetDate = today;
+            this.goalReachedToday = false;
+            this.reminderSwitch.checked = false;
+            this.reminderIntervalEl.value = "60";
+            await this.saveData();
+        }
+        this.dailyWaterGoalEl.textContent = this.dailyWaterGoal;
+        this.updateDisplay();
+        this.setReminder();
+    }
+  
+
+    async saveData() {
+        await this.docRef.set({
+            dailyWaterGoal: this.dailyWaterGoal,
+            currentAmount: this.currentAmount,
+            lastResetDate: this.lastResetDate,
+            reminderEnabled: this.reminderSwitch.checked,
+            reminderInterval: this.reminderIntervalEl.value,
+            goalReachedToday: this.goalReachedToday
+        }, { merge: true });
+    }
+
+    updateDisplay() {
+        this.currentAmountEl.textContent = this.currentAmount;
+        const fillPercentage = (this.currentAmount / this.dailyWaterGoal) * 100;
+        this.waterFillEl.style.height = `${Math.min(fillPercentage, 100)}%`;
+        if (this.currentAmount >= this.dailyWaterGoal) {
+            this.waterFillEl.style.backgroundColor = '#2ecc71';
+            this.waterFillEl.style.background = 'linear-gradient(to top, #28a745, #2ecc71)';
+            if (!this.goalReachedToday) {
+                this.showNotification("Congratulations! Daily water goal reached!");
+                this.goalReachedToday = true;
+                this.saveData();
+                if (this.reminderIntervalId) {
+                    clearInterval(this.reminderIntervalId);
+                    this.reminderIntervalId = null;
+                    this.reminderSwitch.checked = false;
+                }
+            }
+        } else {
+            this.waterFillEl.style.backgroundColor = '#29b6f6';
+            this.waterFillEl.style.background = 'linear-gradient(to top, #4dd0e1, #29b6f6)';
+            this.goalReachedToday = false;
+            this.saveData();
+        }
+    }
+
+    async addWater(amount) {
+        this.currentAmount += amount;
+        await this.saveData();
+        this.updateDisplay();
+        this.showNotification(`+${amount} ml added!`);
+    }
+
+    addCustomWater() {
+        const customAmount = parseInt(this.customWaterAmountInput.value);
+        if (isNaN(customAmount) || customAmount <= 0) {
+            this.showNotification("Please enter a valid positive number for water intake.");
+            return;
+        }
+        this.addWater(customAmount);
+        this.customWaterAmountInput.value = '';
+    }
+
+    async reset() {
+        if (confirm('Are you sure you want to reset your water intake for today?')) {
+            this.currentAmount = 0;
+            this.lastResetDate = new Date().toDateString();
+            this.goalReachedToday = false;
+            await this.saveData();
+            this.updateDisplay();
+            this.showNotification('Water intake reset for today!');
+            this.setReminder();
+        }
+    }
+
+    setReminder() {
+        if (this.reminderIntervalId) {
+            clearInterval(this.reminderIntervalId);
+            this.reminderIntervalId = null;
+        }
+        if (this.goalReachedToday) {
+            this.reminderSwitch.checked = false;
+            this.showNotification("Goal already reached! Reminders off for today.");
+            this.saveData();
+            return;
+        }
+        if (this.reminderSwitch.checked) {
+            if (!("Notification" in window)) {
+                this.showNotification("This browser does not support desktop notifications.");
+                this.reminderSwitch.checked = false;
+                return;
+            } else if (Notification.permission === "denied") {
+                this.showNotification("Notification permission denied. Please enable it in browser settings.");
+                this.reminderSwitch.checked = false;
+                return;
+            }
+            if (Notification.permission !== "granted") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        this.showNotification("Notification permission granted!");
+                        this.startReminderInterval();
+                    } else {
+                        this.showNotification("Notification permission denied.");
+                        this.reminderSwitch.checked = false;
+                    }
+                });
+            } else {
+                this.startReminderInterval();
+            }
+        }
+        this.saveData();
+    }
+
+    startReminderInterval() {
+        const intervalMins = parseInt(this.reminderIntervalEl.value);
+        const intervalMs = intervalMins * 60 * 1000;
+        if (!this.goalReachedToday) {
+            this.showNotification(`Water reminders set for every ${intervalMins} minutes.`);
+        }
+        this.reminderIntervalId = setInterval(() => {
+            if (this.currentAmount < this.dailyWaterGoal) {
+                new Notification('Selfnutri Water Reminder', {
+                    body: `Time to drink some water! You've had ${this.currentAmount}ml out of ${this.dailyWaterGoal}ml.`,
+                    icon: 'images/selfnutri-favicon.png'
+                });
+            } else {
+                if (this.reminderIntervalId) {
+                    clearInterval(this.reminderIntervalId);
+                    this.reminderIntervalId = null;
+                    this.reminderSwitch.checked = false;
+                    this.saveData();
+                }
+            }
+        }, intervalMs);
+    }
+
+    showNotification(message) {
+        this.notificationEl.textContent = message;
+        this.notificationEl.classList.add('show');
+        setTimeout(() => {
+            this.notificationEl.classList.remove('show');
+        }, 3000);
+    }
+}
+// Menu toggle logic
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menuToggle');
+    const menuDropdown = document.getElementById('menuDropdown');
+
+    if (menuToggle && menuDropdown) {
+        menuToggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            menuDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!menuDropdown.contains(event.target) && !menuToggle.contains(event.target)) {
+                menuDropdown.classList.remove('active');
+            }
+        });
+
+        const menuLinks = menuDropdown.querySelectorAll('a');
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                menuDropdown.classList.remove('active');
+            });
+        });
+    }
+});
+
+// --- Initial Load Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    auth.onAuthStateChanged(async user => {
+        if (user) {
+            // Optional: Profile completion check
+            const docSnap = await db.collection("users").doc(user.uid).get();
+            if (!docSnap.exists || docSnap.data().profileComplete !== true) {
+                window.location.href = 'profile.html';
+                return;
+            }
+            const waterTracker = new WaterTracker(user.uid);
+            waterTracker.loadData();
+        } else {
+            window.location.href = 'signin.html';
+        }
+    });
+});
+</script>
+<div class="footer">
+    &copy; 2025 Selfnutri. All rights reserved.
+  </div>
+</body>
+</html>

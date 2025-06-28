@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Selfnutri - Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/selfnutri-favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --primary: #2196f3;
+  --primary-light: #e3f2fd;
+  --primary-dark: #1976d2;
+  --text: #333;
+  --text-light: #666;
+  --bg: #f5f7fa;
+  --card-bg: #fff;
+  --border: #e0e0e0;
+  --radius: 16px;
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+* {
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+ font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%) !important;
+  color: #333 !important;
+  line-height: 1.6;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.footer {
+      margin-top: auto;
+  color: #888;
+  font-size: 0.95em;
+  text-align: center;
+  width: 100%;
+  padding-bottom: 18px;
+    }
+
+h1, h2 {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text); /* Ensure headers retain dark text */
+}
+p {
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+.welcome-container {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff !important;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px 0;
+  margin: 32px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: unset;
+  justify-content: center;
+}
+.welcome-header {
+  text-align: center;
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.welcome-card {
+  background-color: #e3f2fd !important;
+  border-radius: var(--radius);
+  padding: 24px 24px 16px 24px;
+  margin-bottom: 0;
+  max-width: 370px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  background-color: white !important; /* Explicit white background with !important */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 2rem;
+}
+.profile-setup h2 {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.profile-form {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.input-group label {
+  font-weight: 500;
+  color: var(--text);
+}
+.input-group input,
+.input-group select {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border 0.2s;
+  background-color: #fff !important; /* Explicit white background for inputs */
+  color: #333 !important; /* Explicit dark text for inputs */
+}
+.input-group input,
+.input-group select {
+  width: 100%;
+  box-sizing: border-box;
+}
+.welcome-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+  flex: 1; /* Make primary button take available space */
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex: 1; /* Make secondary button take available space */
+}
+.btn-secondary:hover {
+  background: var(--primary-light);
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6) !important; /* Explicit dark background with !important */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: #fefefe !important; /* Explicit light background with !important */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    font-size: 1.1rem;
+    color: #333 !important; /* Explicit dark text with !important */
+}
+
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.modal-content h3 {
+    font-size: 1.8rem;
+    color: var(--text);
+    margin-bottom: 20px;
+}
+
+.modal-content p {
+    margin-bottom: 30px;
+    line-height: 1.6;
+    color: var(--text-light);
+}
+
+.modal-buttons {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 15px;
+}
+
+.modal-buttons button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%; /* Make buttons full width */
+}
+
+.modal-buttons .btn-stay,
+.modal-buttons .btn-continue {
+    background-color: var(--primary);
+    color: white;
+}
+
+.modal-buttons .btn-stay:hover,
+.modal-buttons .btn-continue:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.modal-buttons .btn-cancel-modal {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+.modal-buttons .btn-cancel-modal:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-2px);
+}
+
+
+@media (max-width: 600px) {
+  .welcome-container {
+    padding: 24px 16px;
+    margin: 16px;
+  }
+  .welcome-actions {
+    flex-direction: column;
+  }
+  .modal-content {
+      padding: 20px;
+      font-size: 1rem;
+  }
+  .modal-content h3 {
+      font-size: 1.5rem;
+  }
+  .modal-buttons button {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+  }
+}
+/* Removed @media (prefers-color-scheme: dark) block to enforce light theme */
+</style>
+</head>
+<body>
+<div class="welcome-container">
+  <div class="welcome-header">
+    <h1>Welcome to Selfnutri!</h1>
+    <p>Your personalized nutrition journey starts now</p>
+  </div>
+
+  <div class="welcome-card">
+    <div class="profile-setup">
+      <div class="avatar-placeholder">
+        <span>👤</span>
+      </div>
+      <h2>Complete Your Profile</h2>
+      <form class="profile-form" id="profileForm">
+        <div class="input-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" min="10" max="100">
+        </div>
+        <div class="input-group">
+          <label for="gender">Gender</label>
+          <select id="gender">
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="height">Height (cm)</label>
+          <input type="number" id="height" min="100" max="250">
+        </div>
+        <div class="input-group">
+          <label for="weight">Current Weight (kg)</label>
+          <input type="number" id="weight" min="30" max="300">
+        </div>
+        <div class="input-group">
+          <label for="target-weight">Target Weight (kg)</label>
+          <input type="number" id="target-weight" min="30" max="300">
+        </div>
+        <div class="input-group">
+          <label for="activity">Activity Level</label>
+          <select id="activity">
+            <option value="">Select</option>
+            <option value="sedentary">Sedentary (little or no exercise)</option>
+            <option value="light">Lightly Active (light exercise/sports 1-3 days/week)</option>
+            <option value="moderate">Moderately Active (moderate exercise/sports 3-5 days/week)</option>
+            <option value="active">Active (hard exercise/sports 6-7 days/week)</option>
+            <option value="very-active">Very Active (very hard exercise & physical job)</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="goal">Health Goal</label>
+          <select id="goal">
+            <option value="">Select</option>
+            <option value="weight-loss">Weight Loss</option>
+            <option value="muscle-gain">Muscle Gain</option>
+            <option value="maintain">Maintain Weight</option>
+            <option value="improve-health">Improve Health</option>
+          </select>
+        </div>
+        <div class="welcome-actions">
+          <button type="button" class="btn-secondary" id="skipForNowBtn">Skip for Now</button>
+          <button type="submit" class="btn-primary">Save Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Skip Confirmation Modal -->
+<div id="skipModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>Complete Your Profile?</h3>
+        <p>You can enter your details now to get personalized recommendations, or continue exploring other features of the app without completing your profile.</p>
+        <div class="modal-buttons">
+            <button class="btn-stay" id="stayOnProfileBtn">Enter Details Now</button>
+            <button class="btn-continue" id="continueAnywayBtn">Continue to App</button>
+            <button class="btn-cancel-modal" id="cancelSkipBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyBhEHEgjRhj8NRkP1t4Ua53kcnFxaS5Zp8",
+  authDomain: "selfnutriapp.firebaseapp.com",
+  projectId: "selfnutriapp",
+  storageBucket: "selfnutriapp.firebasestorage.app",
+  messagingSenderId: "244812012239",
+  appId: "1:244812012239:web:74ff5518334352787575ba",
+  measurementId: "G-EMGEHKS4NH"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait for Firebase Auth
+ auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+        window.location.href = 'signin.html';
+        return;
+    }
+    try {
+      const docSnap = await db.collection("users").doc(user.uid).get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        // Do NOT redirect if profile is already complete!
+        // Just pre-fill form fields so user can edit anytime
+        document.getElementById('age').value = data.age || '';
+        document.getElementById('gender').value = data.gender || '';
+        document.getElementById('height').value = data.height || '';
+        document.getElementById('weight').value = data.weight || '';
+        document.getElementById('target-weight').value = data.targetWeight || '';
+        document.getElementById('activity').value = data.activity || '';
+        document.getElementById('goal').value = data.goal || '';
+      }
+    } catch (error) {
+      console.error("Error fetching user profile from Firestore:", error);
+    }
+});
+
+  // Handle Profile Form Submission
+  document.getElementById('profileForm').onsubmit = async function(event) {
+    event.preventDefault();
+    const age = document.getElementById('age').value;
+    const gender = document.getElementById('gender').value;
+    const height = document.getElementById('height').value;
+    const weight = document.getElementById('weight').value;
+    const targetWeight = document.getElementById('target-weight').value;
+    const activity = document.getElementById('activity').value;
+    const goal = document.getElementById('goal').value;
+
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        await db.collection("users").doc(user.uid).set({
+          age,
+          gender,
+          height,
+          weight,
+          targetWeight,
+          activity,
+          goal,
+          profileComplete: true
+        }, { merge: true });
+        window.location.href = "bmi.html";
+      } catch (error) {
+        alert("Error saving profile: " + error.message);
+      }
+    } else {
+      window.location.href = 'signin.html';
+    }
+  };
+
+  // Skip for Now Modal Logic
+  const skipForNowBtn = document.getElementById('skipForNowBtn');
+  const skipModal = document.getElementById('skipModal');
+  const stayOnProfileBtn = document.getElementById('stayOnProfileBtn');
+  const continueAnywayBtn = document.getElementById('continueAnywayBtn');
+  const cancelSkipBtn = document.getElementById('cancelSkipBtn');
+
+  function showModal() {
+    skipModal.classList.add('show');
+  }
+  function hideModal() {
+    skipModal.classList.remove('show');
+  }
+
+  skipForNowBtn.addEventListener('click', showModal);
+  stayOnProfileBtn.addEventListener('click', hideModal);
+  cancelSkipBtn.addEventListener('click', hideModal);
+
+  continueAnywayBtn.addEventListener('click', async function() {
+  hideModal();
+  const age = document.getElementById('age').value;
+  const gender = document.getElementById('gender').value;
+  const height = document.getElementById('height').value;
+  const weight = document.getElementById('weight').value;
+  const targetWeight = document.getElementById('target-weight').value;
+  const activity = document.getElementById('activity').value;
+  const goal = document.getElementById('goal').value;
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      await db.collection("users").doc(user.uid).set({
+        age,
+        gender,
+        height,
+        weight,
+        targetWeight,
+        activity,
+        goal,
+        profileComplete: true
+      }, { merge: true });
+      sessionStorage.setItem('skipProfile', 'true');
+      window.location.href = "bmi.html";
+    } catch (error) {
+      alert("Error skipping profile: " + error.message);
+    }
+  } else {
+    window.location.href = 'signin.html';
+  }
+});
+}); // <-- Add this closing parenthesis and semicolon
+// (No duplicate event listener needed; already added above)
+
+</script>
+<div class="footer">
+    &copy; 2025 Selfnutri. All rights reserved.
+  </div>
+</body>
+</html>
