@@ -1,13 +1,23 @@
-# Logs
-logs
+# Node dependencies
+node_modules/
+
+# Firebase service account keys (never commit secrets)
+serviceAccountKey.json
+
+# Log files
+logs/
 *.log
 npm-debug.log*
 
-node_modules/
-serviceAccountKey.json
-pglite-debug
-*.log
-archive/
-.vscode/
-Thumbs.db
+# Build output (if you use build tools)
+dist/
+build/
+
+# OS and editor files
 .DS_Store
+Thumbs.db
+.vscode/
+
+# Debug or temp files
+pglite-debug
+archive/
