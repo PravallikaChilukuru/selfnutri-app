@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Selfnutri-Calorie Tracker</title>
+  <link rel="icon" type="image/png" href="images/selfnutri-favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2196f3;
+      --primary-light: #e3f2fd;
+      --danger: #f44336;
+      --bg: #f5f7fa;
+      --text: #111;
+      --radius: 18px;
+      --shadow: 0 2px 8px rgba(33,150,243,0.08);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 1.075rem;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden; /* Ensure no horizontal scroll */
+    }
+
+  * {
+ font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  box-sizing: border-box;
+  }
+    /* New Header Styles from bmi.html */
+    .special-header {
+            width: 95%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            border-radius: 18px;
+            margin: 20px auto;
+            box-sizing: border-box;
+            max-width: 1200px; /* Limit header width */ 
+            transition: box-shadow 0.3s ease;
+            z-index: 2000;
+        }
+    .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #2196f3;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+    .logo i {
+        margin-right: 8px;
+        color: #2196f3;
+    }
+    .menu-toggle {
+        font-size: 1.8rem;
+        color: #2196f3;
+        cursor: pointer;
+        position: relative;
+    }
+    .menu-dropdown {
+        display: none;
+        position: absolute;
+        top: 60px; /* Adjust based on header height */
+        right: 0;
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 1000;
+        min-width: 200px;
+    }
+    .menu-dropdown.active {
+        display: block;
+    }
+    .menu-dropdown a {
+        display: block;
+        padding: 15px 20px;
+        text-decoration: none;
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        color: #333;
+        font-size: 1rem;
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s ease;
+    }
+    .menu-dropdown a:last-child {
+        border-bottom: none;
+    }
+    .menu-dropdown a:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Main Content */
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .container {
+      background-color: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 30px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h1, h2 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .info-card {
+      background-color: var(--primary-light);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .info-card h3 {
+      margin-bottom: 5px;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+
+    .info-card p {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .btn-add-meal {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 20px;
+    }
+
+    .btn-add-meal:hover {
+      background-color: var(--primary);
+    }
+
+    .meal-list {
+      margin-top: 25px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+
+    .meal-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .meal-item:last-child {
+      border-bottom: none;
+    }
+
+    .meal-details {
+      flex-grow: 1;
+    }
+
+    .meal-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .meal-macros {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .meal-calories {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-left: 15px;
+    }
+
+    .meal-actions button {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-left: 10px;
+      color: #777;
+    }
+
+    .meal-actions button:hover {
+      color: var(--primary);
+    }
+    .meal-actions button.delete-btn {
+      color: var(--danger);
+    }
+    .meal-actions button.delete-btn:hover {
+      color: var(--danger);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 2000; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      width: 95%;
+      max-width: 500px;
+      position: relative;
+      margin-top: 40px;
+    }
+
+    .close-button {
+      color: #aaa;
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+      color: #333;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .modal-form .input-group {
+      margin-bottom: 15px;
+    }
+
+    .modal-form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .modal-form input[type="text"],
+    .modal-form input[type="number"],
+    .modal-form select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .modal-form button {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .modal-form button:hover {
+      background-color: var(--primary);
+    }
+    .modal-form button[type="button"] { /* Cancel button */
+        background-color: #ccc;
+        margin-top: 10px;
+    }
+    .modal-form button[type="button"]:hover {
+        background-color: #bbb;
+    }
+
+    /* Date Navigation */
+    .date-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 600px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        background-color: #fff;
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+    }
+    .date-nav button {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.2s;
+    }
+    .date-nav button:hover {
+        background-color: var(--primary);
+    }
+    .date-nav span {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--primary);
+    }
+
+    /* Reminder Section */
+    .reminder-section {
+      background-color: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 30px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    .reminder-section h2 {
+      text-align: left;
+      margin-top: 0;
+      margin-bottom: 18px;
+      color: var(--primary);
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .reminder-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .reminder-option label {
+      font-weight: 500;
+      font-size: 1.05rem;
+    }
+
+    .reminder-option select {
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 28px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+    input:focus + .slider {
+      box-shadow: 0 0 1px var(--primary);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+    .notification {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        display: none; /* Hidden by default */
+        z-index: 1002;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    .notification.show {
+        display: block;
+        opacity: 1;
+    }
+    .footer {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: auto; /* Pushes footer to the bottom */
+        }
+    @media (max-width: 600px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        .container, .reminder-section {
+            padding: 20px;
+        }
+        .date-nav {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="special-header">
+    <a href="dashboard.html" class="logo" style="text-decoration:none;">
+  <img src="images/selfnutri.png" alt="Selfnutri Logo" style="height:38px;vertical-align:middle;margin-right:10px;">
+  <span style="font-size:1.8rem;font-weight:bold;font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;">
+    <span style="color:#111;">Self</span><span style="color:#2196f3;">nutri</span>
+  </span>
+</a>
+    <div class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="bmi.html">BMI</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="calorie-tracker.html">Calorie Tracker</a>
+        <a href="water-tracker.html">Water Tracker</a>
+        <a href="ai-chef.html">AI Chef</a>
+        <a href="menu.html">Profile</a>
+        <a href="#" id="signoutButton">Sign Out</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="date-nav">
+        <button id="prevDayBtn"><i class="fas fa-chevron-left"></i> Previous</button>
+        <span id="currentDate"></span>
+        <button id="nextDayBtn">Next <i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <div class="container">
+      <h1>Calorie Tracker</h1>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>Target</h3>
+          <p id="targetCalories">0 kcal</p>
+        </div>
+        <div class="info-card">
+          <h3>Consumed</h3>
+          <p id="consumedCalories">0 kcal</p>
+        </div>
+        <div class="info-card">
+          <h3>Remaining</h3>
+          <p id="remainingCalories">0 kcal</p>
+        </div>
+      </div>
+
+      <button class="btn-add-meal" id="addMealBtn">Add Meal</button>
+
+      <div class="meal-list" id="mealList">
+        <h2>Meals Today</h2>
+        <!-- Meals will be injected here -->
+      </div>
+      <p id="noMealsMessage" style="text-align: center; color: #888; display:none;">No meals logged for this date.</p>
+    </div>
+    
+    <div class="reminder-section">
+  <h2><i class="fas fa-bell"></i> Meal Reminders</h2>
+  <div class="reminder-option">
+    <label for="reminderSwitch">Enable Reminders</label>
+    <label class="toggle-switch">
+      <input type="checkbox" id="reminderSwitch">
+      <span class="slider"></span>
+    </label>
+  </div>
+    <div class="reminder-option">
+      <label for="reminderInterval">Remind me every</label>
+      <select id="reminderInterval">
+        <option value="60">1 hour</option>
+        <option value="90">1.5 hours</option>
+        <option value="120">2 hours</option>
+        <option value="180">3 hours</option>
+        <option value="240">4 hours</option>
+      </select>
+
+    </div>
+    <div id="reminderStatus" style="margin-top:10px; color: var(--primary); font-weight:500;"></div>
+  </div>
+  </main>
+
+  <div class="footer">
+    &copy; 2025 Selfnutri. All rights reserved.
+  </div>
+
+  <div id="mealModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="closeMealModal">&times;</span>
+      <h2>Add/Edit Meal</h2>
+      <form id="mealForm" class="modal-form">
+        <input type="hidden" id="mealIndex"> <div class="input-group">
+          <label for="mealName">Meal Name</label>
+          <input type="text" id="mealName" required>
+        </div>
+        <div class="input-group">
+          <label for="mealCalories">Calories (kcal)</label>
+          <input type="number" id="mealCalories" min="0" required>
+        </div>
+        <div class="input-group">
+          <label for="mealProtein">Protein (g)</label>
+          <input type="number" id="mealProtein" min="0">
+        </div>
+        <div class="input-group">
+          <label for="mealCarbs">Carbs (g)</label>
+          <input type="number" id="mealCarbs" min="0">
+        </div>
+        <div class="input-group">
+          <label for="mealFats">Fats (g)</label>
+          <input type="number" id="mealFats" min="0">
+        </div>
+        <div class="input-group">
+          <label for="mealType">Meal Type</label>
+          <select id="mealType">
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Snack">Snack</option>
+          </select>
+        </div>
+        <button type="submit" id="saveMealBtn">Add Meal</button>
+        <button type="button" id="cancelMealBtn">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <!-- ...existing code... -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Your Firebase configuration (MUST BE THE SAME AS OTHER FILES)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhEHEgjRhj8NRkP1t4Ua53kcnFxaS5Zp8",
+      authDomain: "selfnutriapp.firebaseapp.com",
+      projectId: "selfnutriapp",
+      storageBucket: "selfnutriapp.firebasestorage.app",
+      messagingSenderId: "244812012239",
+      appId: "1:244812012239:web:74ff5518334352787575ba",
+      measurementId: "G-EMGEHKS4NH"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const $ = id => document.getElementById(id);
+
+    let currentMeals = [];
+    let reminderTimer;
+    let reminderEnabled = false;
+    let selectedDate = new Date(); // Track currently displayed date
+
+    const notificationEl = $('notification');
+
+    function showNotification(message) {
+      notificationEl.textContent = message;
+      notificationEl.classList.add('show');
+      setTimeout(() => {
+        notificationEl.classList.remove('show');
+      }, 3000);
+    }
+
+    // Date formatting helper
+    function formatDate(date) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+    }
+    function formatDateForFirestore(date) {
+        // YYYY-MM-DD format for Firestore document IDs
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // --- Core Calorie Tracker Functions (adapted for Firebase) ---
+
+    // Load user's profile data (for target calories)
+    async function loadUserProfile() {
+        const user = auth.currentUser;
+        if (!user) return; // Handled by auth.onAuthStateChanged
+
+        try {
+            const docSnap = await db.collection("users").doc(user.uid).get();
+            if (docSnap.exists) {
+                const userData = docSnap.data();
+                // Use kg/cm and accept both activityLevel and activity
+                let target = 2000; // Default target
+                const activityLevel = userData.activityLevel || userData.activity;
+                if (userData.gender && userData.weight && userData.height && userData.age && activityLevel) {
+                    // Mifflin-St Jeor (kg, cm)
+                    let bmr;
+                    if (userData.gender === 'male') {
+                        bmr = (10 * userData.weight) + (6.25 * userData.height) - (5 * userData.age) + 5;
+                    } else { // female
+                        bmr = (10 * userData.weight) + (6.25 * userData.height) - (5 * userData.age) - 161;
+                    }
+
+                    let activityFactor = 1.2; // Sedentary
+                    if (activityLevel === 'light') activityFactor = 1.375;
+                    else if (activityLevel === 'moderate') activityFactor = 1.55;
+                    else if (activityLevel === 'active') activityFactor = 1.725;
+                    else if (activityLevel === 'very-active') activityFactor = 1.9;
+
+                    let tdee = bmr * activityFactor;
+
+                    if (userData.goal === 'weight-loss') target = tdee - 500;
+                    else if (userData.goal === 'muscle-gain') target = tdee + 300;
+                    else target = tdee;
+
+                    target = Math.round(target);
+                }
+                $('targetCalories').textContent = `${target} kcal`;
+                return target;
+            }
+        } catch (error) {
+            console.error("Error loading user profile for target calories:", error);
+            showNotification("Failed to load calorie target.");
+        }
+        return 0;
+    }
+
+    async function loadMealsForDate(date) {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const dateString = formatDateForFirestore(date);
+        try {
+            const docSnap = await db.collection("users").doc(user.uid).collection("dailyMeals").doc(dateString).get();
+            if (docSnap.exists) {
+                currentMeals = docSnap.data().meals || [];
+                console.log(`Meals loaded for ${dateString}:`, currentMeals);
+            } else {
+                currentMeals = [];
+                console.log(`No meals found for ${dateString}.`);
+            }
+            displayMeals();
+            updateSummary();
+        } catch (error) {
+            console.error("Error loading meals from Firestore:", error);
+            showNotification("Failed to load meals.");
+            currentMeals = [];
+            displayMeals();
+            updateSummary();
+        }
+    }
+
+    async function saveMealsForDate(date, mealsToSave) {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const dateString = formatDateForFirestore(date);
+        try {
+            await db.collection("users").doc(user.uid).collection("dailyMeals").doc(dateString).set({ meals: mealsToSave });
+            console.log(`Meals saved for ${dateString}.`);
+            showNotification("Meal saved!");
+        } catch (error) {
+            console.error("Error saving meals to Firestore:", error);
+            showNotification("Failed to save meal.");
+        }
+    }
+
+    function displayMeals() {
+    const mealListDiv = $('mealList');
+    mealListDiv.innerHTML = '<h2>Meals Today</h2>';
+    if (currentMeals.length === 0) {
+        if ($('noMealsMessage')) $('noMealsMessage').style.display = 'block';
+        return;
+    }
+    if ($('noMealsMessage')) $('noMealsMessage').style.display = 'none';
+
+    currentMeals.forEach((meal, index) => {
+        const mealItem = document.createElement('div');
+        mealItem.className = 'meal-item';
+        mealItem.innerHTML = `
+            <div class="meal-details">
+                <div class="meal-name">${meal.name} (${meal.type})</div>
+                <div class="meal-macros">
+                    P: ${meal.protein || 0}g, C: ${meal.carbs || 0}g, F: ${meal.fats || 0}g
+                </div>
+            </div>
+            <div class="meal-calories">${meal.calories} kcal</div>
+            <div class="meal-actions">
+                <button class="edit-btn" data-index="${index}"><i class="fas fa-edit"></i></button>
+                <button class="delete-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        `;
+        mealListDiv.appendChild(mealItem);
+    });
+
+    // Add event listeners for edit/delete buttons
+    mealListDiv.querySelectorAll('.edit-btn').forEach(button => {
+        button.onclick = (e) => editMeal(parseInt(e.currentTarget.dataset.index));
+    });
+    mealListDiv.querySelectorAll('.delete-btn').forEach(button => {
+        button.onclick = (e) => deleteMeal(parseInt(e.currentTarget.dataset.index));
+    });
+}
+  
+
+    async function updateSummary() {
+        const totalConsumed = currentMeals.reduce((sum, meal) => sum + parseInt(meal.calories || 0), 0);
+        $('consumedCalories').textContent = `${totalConsumed} kcal`;
+
+        const targetCalories = parseInt($('targetCalories').textContent.replace(' kcal', '')) || 0;
+        const remaining = targetCalories - totalConsumed;
+        $('remainingCalories').textContent = `${remaining} kcal`;
+        $('remainingCalories').style.color = remaining >= 0 ? varStyle('primary') : varStyle('danger');
+    }
+
+    function varStyle(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(`--${name}`);
+    }
+
+    // Modal and Form Logic
+    $('addMealBtn').onclick = () => {
+    $('mealForm').reset();
+    $('mealIndex').value = '';
+    $('saveMealBtn').textContent = 'Add Meal';
+    $('mealModal').style.display = 'flex';
+    $('mealName').focus();
+};
+
+    $('closeMealModal').onclick = () => $('mealModal').style.display = 'none';
+    $('cancelMealBtn').onclick = () => $('mealModal').style.display = 'none';
+
+    $('mealForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const meal = {
+            name: $('mealName').value,
+            calories: parseInt($('mealCalories').value || 0),
+            protein: parseInt($('mealProtein').value || 0),
+            carbs: parseInt($('mealCarbs').value || 0),
+            fats: parseInt($('mealFats').value || 0),
+            type: $('mealType').value
+        };
+
+        const mealIndex = $('mealIndex').value;
+        if (mealIndex !== '') {
+            currentMeals[parseInt(mealIndex)] = meal;
+            showNotification("Meal updated!");
+        } else {
+            currentMeals.push(meal);
+            showNotification("Meal added!");
+        }
+        await saveMealsForDate(selectedDate, currentMeals);
+        $('mealModal').style.display = 'none';
+        displayMeals();
+        updateSummary();
+    };
+
+    async function editMeal(index) {
+        const meal = currentMeals[index];
+        if (meal) {
+            $('mealName').value = meal.name;
+            $('mealCalories').value = meal.calories;
+            $('mealProtein').value = meal.protein || 0;
+            $('mealCarbs').value = meal.carbs || 0;
+            $('mealFats').value = meal.fats || 0;
+            $('mealType').value = meal.type;
+            $('mealIndex').value = index;
+            $('saveMealBtn').textContent = 'Save Changes';
+            $('mealModal').style.display = 'flex';
+        }
+    }
+
+    async function deleteMeal(index) {
+        if (confirm('Are you sure you want to delete this meal?')) {
+            currentMeals.splice(index, 1);
+            await saveMealsForDate(selectedDate, currentMeals);
+            showNotification("Meal deleted!");
+            displayMeals();
+            updateSummary();
+        }
+    }
+
+    // Date Navigation Logic
+    $('prevDayBtn').onclick = async () => {
+        selectedDate.setDate(selectedDate.getDate() - 1);
+        $('currentDate').textContent = formatDate(selectedDate);
+        await loadMealsForDate(selectedDate);
+    };
+
+    $('nextDayBtn').onclick = async () => {
+        selectedDate.setDate(selectedDate.getDate() + 1);
+        $('currentDate').textContent = formatDate(selectedDate);
+        await loadMealsForDate(selectedDate);
+    };
+
+    // --- Reminder Logic (No Firebase change needed here, it's local) ---
+    $('reminderSwitch').addEventListener('change', setReminder);
+    $('reminderInterval').addEventListener('change', setReminder);
+    function setReminder() {
+    // Clear any existing interval
+    if (reminderTimer) {
+        clearInterval(reminderTimer);
+        reminderTimer = null;
+    }
+
+    const reminderEnabled = $('reminderSwitch').checked;
+    const statusEl = document.getElementById('reminderStatus');
+    const interval = parseInt($('reminderInterval').value) * 60 * 1000;
+
+    if (reminderEnabled) {
+        // Check Notification permission
+        if (!("Notification" in window)) {
+            showNotification("This browser does not support notifications.");
+            $('reminderSwitch').checked = false;
+            statusEl.textContent = 'Reminders are off.';
+            return;
+        }
+        if (Notification.permission === "denied") {
+            showNotification("Notification permission denied. Please enable it in browser settings.");
+            $('reminderSwitch').checked = false;
+            statusEl.textContent = 'Reminders are off.';
+            return;
+        }
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    showNotification('Meal reminders enabled.');
+                    startMealReminderInterval(interval, statusEl);
+                } else {
+                    showNotification("Notification permission denied.");
+                    $('reminderSwitch').checked = false;
+                    statusEl.textContent = 'Reminders are off.';
+                }
+            });
+        } else {
+            showNotification('Meal reminders enabled.');
+            startMealReminderInterval(interval, statusEl);
+        }
+    } else {
+        statusEl.textContent = 'Reminders are off.';
+        showNotification('Meal reminders disabled.');
+    }
+}
+
+function startMealReminderInterval(interval, statusEl) {
+    statusEl.textContent = `Reminders enabled: every ${$('reminderInterval').options[$('reminderInterval').selectedIndex].text}`;
+    reminderTimer = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+            new Notification('Selfnutri Meal Reminder', {
+                body: 'Time to log your next meal!',
+                icon: 'images/selfnutri-favicon.png'
+            });
+        }
+    }, interval);
+}
+    // JavaScript for dropdown menu toggle and close (Common code)
+    const menuToggle = document.getElementById('menuToggle');
+    const menuDropdown = document.getElementById('menuDropdown');
+
+    menuToggle.addEventListener('click', function(event) {
+        event.stopPropagation();
+        menuDropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!menuDropdown.contains(event.target) && !menuToggle.contains(event.target)) {
+            menuDropdown.classList.remove('active');
+        }
+    });
+
+    const menuLinks = menuDropdown.querySelectorAll('a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            menuDropdown.classList.remove('active');
+        });
+    });
+
+    // Sign Out Functionality
+    document.getElementById('signoutButton').addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            await auth.signOut();
+            console.log('User signed out.');
+            window.location.href = 'signin.html';
+        } catch (error) {
+            console.error('Sign out error:', error.message);
+            alert('Error signing out. Please try again.');
+        }
+    });
+
+    // --- Initial Load Logic with Firebase Auth State Listener ---
+      auth.onAuthStateChanged(async user => {
+        if (user) {
+            $('currentDate').textContent = formatDate(selectedDate);
+            const target = await loadUserProfile();
+            await loadMealsForDate(selectedDate); // This already calls updateSummary()
+            setReminder();
+        } else {
+            console.log("No user logged in. Redirecting to signin.html");
+            window.location.href = 'signin.html';
+        }
+      });
+  </script>
+</body>
+</html>

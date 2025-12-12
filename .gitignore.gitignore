@@ -1,5 +1,6 @@
 # Node dependencies
 node_modules/
+*.local
 
 # Firebase service account keys (never commit secrets)
 serviceAccountKey.json
@@ -22,9 +23,5 @@ Thumbs.db
 pglite-debug
 archive/
 
-# Terraform generated files
-.terraform/
-*.tfstate
-*.tfstate.*
-.terraform.lock.hcl
-*.tfstate.backup
+# Ignore the huge node_modules directory
+functions/node_modules

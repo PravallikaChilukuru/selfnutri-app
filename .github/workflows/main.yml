@@ -1,12 +1,12 @@
-name: AWS Infrastructure & Frontend Sync
+name: AWS Static Frontend Deployment
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: # allows manual run
+  workflow_dispatch:
 
 jobs:
-  terraform-and-sync:
+  static-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,13 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Setup Node (for AWS CLI if needed)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      # Step 3: Configure AWS credentials
+      # Step 2: Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -28,36 +22,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
 
-      # Step 4: Install Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.7.6
-
-      # Step 5: Initialize Terraform
-      - name: Terraform Init
+      # Step 3: Sync Static Files to S3 (CD Step)
+      - name: Sync Static Files to S3
         run: |
-          cd infra
-          terraform init -input=false
+          # The source path is corrected to './' to sync all files from the repository root.
+          aws s3 sync ./ s3://selfnutri-frontend-rchilukuru --delete
 
-      # Step 6: Plan Terraform changes
-      - name: Terraform Plan
-        run: |
-          cd infra
-          terraform plan -out=tfplan -input=false
-
-      # Step 7: Apply Terraform
-      - name: Terraform Apply
-        run: |
-          cd infra
-          terraform apply -auto-approve tfplan
-
-      # Step 8: Sync frontend to S3 (optional if using CloudFront)
-      - name: Sync Frontend to S3
-        run: |
-          aws s3 sync ./build s3://selfnutri-frontend-rchilukuru --delete
-
-      # Step 9: Invalidate CloudFront cache
+      # Step 4: Invalidate CloudFront cache (CD Step)
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id E21L1ZDOAHZJ3L --paths "/*"
