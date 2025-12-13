@@ -1,6 +1,6 @@
 # Selfnutri – Cloud Computing Final Project (MSIT-3470)
 
-![Selfnutri Logo](frontend/images/selfnutri.png)
+![Selfnutri Logo](frontend/images/selfnutri-favicon.png)
 
 The final, live application is accessible here: **[https://d3tuac21giuzpq.cloudfront.net/](https://d3tuac21giuzpq.cloudfront.net/)**
 
