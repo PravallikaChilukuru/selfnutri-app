@@ -1,6 +1,6 @@
 # Selfnutri – Cloud Computing Final Project (MSIT-3470)
 
-![Selfnutri Logo](docs/selfnutri.png)
+![Selfnutri Logo](frontend/images/selfnutri.png)
 
 The final, live application is accessible here: **[https://d3tuac21giuzpq.cloudfront.net/](https://d3tuac21giuzpq.cloudfront.net/)**
 
@@ -30,7 +30,7 @@ The application uses a hybrid serverless design: AWS provides static hosting, CD
 
 ### Architecture Diagram
 
-![Selfnutri Architecture Diagram](docs/diagram.PNG) 
+![Selfnutri Architecture Diagram](frontend/images/diagram.PNG) 
 
 ### Core Cloud Components
 
