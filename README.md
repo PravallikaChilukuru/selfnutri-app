@@ -75,25 +75,26 @@ curl -X POST https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs \
 
 # Fetch all logs (Read Path)
 curl https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs
-
+```
 ## 4) SLO & Monitoring Plan
 
-**Design-Level Metrics**
+**Design-Level Metrics:**
 
 - **Latency:** p95 for API endpoints < 400ms  
 - **Error Rate:** < 2% over 5 minutes  
 - **Availability:** Frontend target: 99% uptime  
 
-**Monitoring Tools**
+**Monitoring Tools:**
 
 - AWS CloudWatch (API & Lambda monitoring)  
 - Firebase Analytics (frontend usage metrics)  
 
-**Alerting**
+**Alerting:**
 
 - Notifications triggered if latency or error thresholds are exceeded  
-- Alerts sent via email or messaging for immediate team action
+- Alerts sent via email or messaging for immediate team action  
 
+---
 
 ## 5) Deployment & Run Instructions
 
@@ -108,6 +109,7 @@ python -m http.server 8000
 # Open in browser: http://localhost:8000
 
 # Or use VS Code Live Server extension
+```
 
 ### Cloud Deployment
 
@@ -115,3 +117,5 @@ python -m http.server 8000
 2. Set **Default Root Object** = `index.html`
 3. Serve via CloudFront distribution: [https://d3tuac21giuzpq.cloudfront.net/](https://d3tuac21giuzpq.cloudfront.net/)
 4. Invalidate cache after updates if needed
+
+
