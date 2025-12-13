@@ -78,13 +78,22 @@ curl https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs
 
 ## 4) SLO & Monitoring Plan
 
-**Design-Level Metrics:**
+**Design-Level Metrics**
 
-* **Latency:** p95 for API endpoints < 400ms
-* **Error Rate:** < 2% over 5 minutes
-* **Availability:** Frontend 99% uptime target
-* **Monitoring Tools:** AWS CloudWatch / Firebase Analytics
-* **Alerts:** Notify team if thresholds exceeded
+- **Latency:** p95 for API endpoints < 400ms  
+- **Error Rate:** < 2% over 5 minutes  
+- **Availability:** Frontend target: 99% uptime  
+
+**Monitoring Tools**
+
+- AWS CloudWatch (API & Lambda monitoring)  
+- Firebase Analytics (frontend usage metrics)  
+
+**Alerting**
+
+- Notifications triggered if latency or error thresholds are exceeded  
+- Alerts sent via email or messaging for immediate team action
+
 
 ## 5) Deployment & Run Instructions
 
