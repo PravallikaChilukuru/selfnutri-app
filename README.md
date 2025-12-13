@@ -75,3 +75,17 @@ curl -X POST https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs \
 
 # Fetch all logs (Read Path)
 curl https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs
+
+4) SLO & Monitoring Plan
+
+Design-Level Metrics:
+
+Latency: p95 for API endpoints < 400ms
+
+Error Rate: < 2% over 5 minutes
+
+Availability: Frontend 99% uptime target
+
+Monitoring Tools: AWS CloudWatch / Firebase Analytics
+
+Alerts: Notify team if thresholds exceeded
