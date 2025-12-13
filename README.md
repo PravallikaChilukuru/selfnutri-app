@@ -37,7 +37,7 @@ The application uses a hybrid serverless design: AWS provides static hosting, CD
 ### Architecture Diagram
 
 <p align="center">
-<img src="frontend/images/diagram.PNG" alt="Selfnutri Architecture Diagram" width="600"/>
+<img src="frontend/images/diagram.PNG" alt="Selfnutri Architecture Diagram" width="800"/>
 </p>
 
 ### Core Cloud Components
