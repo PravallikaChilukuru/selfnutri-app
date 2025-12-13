@@ -76,16 +76,33 @@ curl -X POST https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs \
 # Fetch all logs (Read Path)
 curl https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs
 
-4) SLO & Monitoring Plan
+## 4) SLO & Monitoring Plan
 
-Design-Level Metrics:
+**Design-Level Metrics:**
 
-Latency: p95 for API endpoints < 400ms
+* **Latency:** p95 for API endpoints < 400ms
+* **Error Rate:** < 2% over 5 minutes
+* **Availability:** Frontend 99% uptime target
+* **Monitoring Tools:** AWS CloudWatch / Firebase Analytics
+* **Alerts:** Notify team if thresholds exceeded
 
-Error Rate: < 2% over 5 minutes
+## 5) Deployment & Run Instructions
 
-Availability: Frontend 99% uptime target
+### Local Development / Testing
 
-Monitoring Tools: AWS CloudWatch / Firebase Analytics
+Since this is a static frontend project, you can run it locally with a simple server:
 
-Alerts: Notify team if thresholds exceeded
+```bash
+# Using Python 3
+cd frontend
+python -m http.server 8000
+# Open in browser: http://localhost:8000
+
+# Or use VS Code Live Server extension
+
+### Cloud Deployment
+
+1. Upload the `frontend/` folder contents to the S3 bucket: `selfnutri-frontend-rchilukuru`
+2. Set **Default Root Object** = `index.html`
+3. Serve via CloudFront distribution: [https://d3tuac21giuzpq.cloudfront.net/](https://d3tuac21giuzpq.cloudfront.net/)
+4. Invalidate cache after updates if needed
