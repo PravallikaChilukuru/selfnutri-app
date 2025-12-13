@@ -1,6 +1,6 @@
 # Selfnutri – Cloud Computing Final Project (MSIT-3470)
 
-![Selfnutri Logo](frontend/images/selfnutri-favicon.png)
+<img src="frontend/images/selfnutri.png" alt="Selfnutri Logo" width="200"/>
 
 The final, live application is accessible here: **[https://d3tuac21giuzpq.cloudfront.net/](https://d3tuac21giuzpq.cloudfront.net/)**
 
@@ -19,8 +19,11 @@ The final, live application is accessible here: **[https://d3tuac21giuzpq.cloudf
 
 **Selfnutri** is a lightweight personal health and nutrition tracker that lets users quickly log daily meals and water intake, then review their history and progress over time. The goal is to demonstrate a secure, serverless cloud architecture with real write/read paths.
 
-* **Core Feature (Write Path):** Users submit a new entry via the frontend, which calls a `POST /logs` API to write a document into a managed Firestore database.
-* **Analytics Feature (Read Path):** Users view history powered by a `GET /logs` API that queries Firestore and returns the results to the UI.
+**Core Features:**
+
+* **Write Path:** Users submit a new entry via the frontend, which calls a `POST /logs` API to write a document into a managed Firestore database.
+* **Read Path:** Users view history powered by a `GET /logs` API that queries Firestore and returns the results to the UI.
+* **Future/Optional:** Upload images or files to S3 for tracking meal photos or nutrition files.
 
 ---
 
@@ -30,39 +33,37 @@ The application uses a hybrid serverless design: AWS provides static hosting, CD
 
 ### Architecture Diagram
 
-![Selfnutri Architecture Diagram](frontend/images/diagram.PNG) 
+<img src="frontend/images/diagram.PNG" alt="Selfnutri Architecture Diagram" width="600"/>
 
 ### Core Cloud Components
 
-| Layer | Component(s) | Resource Detail |
-| :--- | :--- | :--- |
-| **Frontend Delivery** | **AWS CloudFront** (CDN) | URL: `https://d3tuac21giuzpq.cloudfront.net/` |
-| **Frontend Hosting** | **AWS S3** (Static Hosting) | Static HTML/CSS/JS is stored in an S3 bucket. |
-| **Backend API** | **AWS API Gateway + Lambda** | API Gateway calls an AWS Lambda function which executes business logic. |
-| **Data Persistence** | **Google Firestore** (Managed NoSQL) | Stores meal and water logs as documents. |
-| **Object Storage** | **AWS S3** (Data Bucket) | Provisioned for future use cases like file/image uploads. |
+| Layer                  | Component(s)                     | Resource Detail |
+|------------------------|---------------------------------|----------------|
+| **Frontend Delivery**   | AWS CloudFront (CDN)            | URL: `https://d3tuac21giuzpq.cloudfront.net/` |
+| **Frontend Hosting**    | AWS S3 (Static Hosting)         | HTML/CSS/JS stored in `selfnutri-frontend-rchilukuru` bucket |
+| **Backend API**         | AWS API Gateway + Lambda        | Executes business logic; connects to Firestore |
+| **Data Persistence**    | Google Firestore (NoSQL DB)    | Stores meal/water logs |
+| **Object Storage**      | AWS S3 (Data Bucket)            | Bucket ARN: `arn:aws:s3:::selfnutri-data-rchilukuru` |
 
 ### Security & Operational Focus
 
-* **CloudFront Origin Access Control (OAC):** Enabled to ensure the frontend S3 bucket only allows access from the CloudFront distribution, blocking direct S3 public access.
-* **Least-Privilege & Secrets:** Lambda and CI/CD use dedicated IAM roles, and all secrets (Firebase credentials, API keys) are injected via environment variables.
+* **CloudFront Origin Access Control (OAC):** Frontend S3 bucket only accessible through CloudFront distribution.
+* **Least-Privilege IAM:** Lambda and CI/CD use dedicated roles.
+* **Secrets:** Stored via environment variables; no credentials committed.
 
 ---
 
 ## 3) API Details (Write & Read Paths)
 
-The backend exposes a minimal, focused API to prove the cloud stack end-to-end.
-
-| Path | Method | Description | Data Operation |
-| :--- | :--- | :--- | :--- |
-| `/logs` | `POST` | Accepts JSON payloads for new logs (meal/water entries) and writes a new document to Firestore. | Write to Firestore |
-| `/logs` | `GET` | Returns all existing logs by reading from Firestore and sending an aggregated JSON list back to the client. | Query Firestore |
+| Path     | Method | Description | Data Operation |
+|----------|--------|-------------|----------------|
+| `/logs`  | POST   | Accepts JSON payloads for new logs (meal/water entries). | Write to Firestore |
+| `/logs`  | GET    | Returns all existing logs as JSON. | Read from Firestore |
 
 ### Example API Requests
 
 ```bash
 # Create a new log (Write Path)
-curl -X POST [https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs](https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs) ...
-
-# Fetch all logs (Read Path)
-curl [https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs](https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs)
+curl -X POST https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs \
+  -H "Content-Type: application/json" \
+  -d '{"type":"water","amount":500,"date":"
