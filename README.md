@@ -1,6 +1,9 @@
 # Selfnutri – Cloud Computing Final Project (MSIT-3470)
 
-<img src="frontend/images/selfnutri.png" alt="Selfnutri Logo" width="200"/>
+<p align="center">
+  <img src="frontend/images/selfnutri.png" alt="Selfnutri Logo" width="200"/>
+</p>
+
 
 The final, live application is accessible here: **[https://d3tuac21giuzpq.cloudfront.net/](https://d3tuac21giuzpq.cloudfront.net/)**
 
@@ -66,4 +69,7 @@ The application uses a hybrid serverless design: AWS provides static hosting, CD
 # Create a new log (Write Path)
 curl -X POST https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs \
   -H "Content-Type: application/json" \
-  -d '{"type":"water","amount":500,"date":"
+  -d '{"type":"water","amount":500,"date":"2025-12-13"}'
+
+# Fetch all logs (Read Path)
+curl https://l38jxggdfh.execute-api.us-west-2.amazonaws.com/logs
