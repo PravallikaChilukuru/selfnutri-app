@@ -118,4 +118,26 @@ python -m http.server 8000
 3. Serve via CloudFront distribution: [https://d3tuac21giuzpq.cloudfront.net/](https://d3tuac21giuzpq.cloudfront.net/)
 4. Invalidate cache after updates if needed
 
+## 7) AI Usage
+
+This project leveraged AI tools (ChatGPT/GPT-5) to assist with scaffolding code, writing documentation, and generating architecture explanations. All AI-generated content was **reviewed and modified** to ensure correctness, security, and compliance with cloud best practices.
+
+### Where AI Helped
+- Drafting the README file structure and Markdown formatting.
+- Generating example API requests for write/read paths.
+- Writing the SLO & Monitoring Plan in a concise format.
+- Suggesting CI/CD pipeline steps and GitHub Actions workflow.
+- Helping with explanations of architecture and cloud components.
+
+### Human Review Notes
+- All IAM roles and secrets were manually verified to ensure least-privilege access.
+- Deployment steps were tested locally and on AWS before committing.
+- Code snippets were debugged and optimized for security and functionality.
+- Architecture diagrams were updated manually to reflect the actual deployed infrastructure.
+
+### Example Prompt
+> "Generate a README section explaining a serverless app with AWS S3, CloudFront, Lambda, and Firestore. Include deployment, SLOs, and monitoring notes."
+
+> AI generated a draft, which was reviewed and edited for accuracy, formatting, and security compliance.
+
 
